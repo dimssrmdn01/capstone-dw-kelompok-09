@@ -1,0 +1,8 @@
+﻿sumber,kode,nama_indikator,wilayah,rincian,periode_tercantum,tahun_dengan_nilai,irisan_dengan_BPS_2015_2025,satuan_kolom,satuan_berdasarkan_definisi,status_kandidat
+WDI,SE.PRE.ENRR,"School enrollment, preprimary (% gross)",Indonesia,Tidak ada rincian kelompok,1960-2025,1970-2018,2015-2018,Kosong,% gross,Kandidat utama pembanding APK PAUD
+WDI,IT.NET.USER.ZS,"Individuals using the Internet (% of population)",Indonesia,Tidak ada rincian kelompok,1960-2025,"1990;1994-2024",2015-2024,Kosong,% populasi,Kandidat pembanding konteks digital
+BPS,1439,APK PAUD,Indonesia,Tidak ada,2015-2025,2015-2025 (11 tahun terisi),2015-2025,Kosong,Perlu verifikasi,Kandidat utama pasangan SE.PRE.ENRR
+BPS,1447,Keterampilan TIK kelompok umur 1,Indonesia,Tidak ada,2015-2025,2015-2025 (11 tahun terisi),2015-2025,Persen,Persen,Kandidat konteks digital
+BPS,1451,Keterampilan TIK kelompok umur 2,Indonesia,Tidak ada,2015-2025,2015-2025 (11 tahun terisi),2015-2025,Persen,Persen,Kandidat konteks digital
+BPS,1221,Kepemilikan telepon seluler,Indonesia,Tidak ada,2015-2025,2015-2025 (11 tahun terisi),2015-2025,Persen,Persen,Kandidat konteks digital
+
