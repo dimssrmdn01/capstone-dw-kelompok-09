@@ -23,7 +23,7 @@ def jalankan(mentah):
           baris_rujukan=int(silver["rujukan_tahun"].notna().sum()),
           baris_batas_who=int(silver["batas_bawah"].notna().sum()))
     SILVER.parent.mkdir(parents=True, exist_ok=True)
-    silver.to_parquet(SILVER, index=False)\
+    silver.to_parquet(SILVER, index=False)
     calon = profil.jalankan(silver)
     pembanding.jalankan(silver, mentah)
     grid.jalankan(silver, mentah)
