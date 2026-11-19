@@ -47,13 +47,10 @@ def baca_satu_csv(berkas: str, raw: Path = RAW) -> pd.DataFrame:
 
 
 def baca_semua_csv(raw: Path = RAW) -> dict[str, pd.DataFrame]:
-   
     return {berkas: baca_satu_csv(berkas, raw=raw) for berkas in BERKAS_CSV}
 
 
-
 def main() -> None:
-    
     print("=" * 88)
     print("PEMBACA CSV BPS - KASUS 09 / KELOMPOK 9")
     print("=" * 88)

@@ -1,4 +1,4 @@
-import pandas as pd
+﻿import pandas as pd
 
 from src import konfigurasi as K
 from src import wilayah as W
@@ -25,13 +25,13 @@ def uji_patahan(silver):
         lebar = g.pivot_table(index="wilayah_kode", columns="periode", values="nilai").sort_index(axis=1)
         per = list(lebar.columns)
         if K.SERI[deret.dasar(seri)]["satuan"].endswith("per_tahun"):
-            hasil.append({"seri_kode": seri, "pergantian": "—", "provinsi": len(lebar), "porsi_naik": None, "porsi_turun": None,
+            hasil.append({"seri_kode": seri, "pergantian": "â€”", "provinsi": len(lebar), "porsi_naik": None, "porsi_turun": None,
                           "patahan": "tidak diuji",
                           "keterangan": "seri laju pertumbuhan: perubahan relatif laju tidak bermakna (bisa berganti tanda); "
                                         "patahan diuji pada seri tingkat"})
             continue
         if len(per) < 3:
-            hasil.append({"seri_kode": seri, "pergantian": "—", "provinsi": 0, "porsi_naik": None, "porsi_turun": None,
+            hasil.append({"seri_kode": seri, "pergantian": "â€”", "provinsi": 0, "porsi_naik": None, "porsi_turun": None,
                           "patahan": "tidak dapat diuji",
                           "keterangan": f"hanya {len(per)} periode; pola serentak dari dua titik tidak bisa dibedakan dari perubahan sungguhan"})
             continue
@@ -39,17 +39,17 @@ def uji_patahan(silver):
             rel = ((lebar[b] - lebar[a]) / lebar[a].abs()).dropna()
             minimal = K.ANOMALI.get("min_provinsi_patahan", 0)
             if len(rel) < minimal:
-                hasil.append({"seri_kode": seri, "pergantian": f"{a}→{b}", "provinsi": len(rel), "porsi_naik": None,
+                hasil.append({"seri_kode": seri, "pergantian": f"{a}â†’{b}", "provinsi": len(rel), "porsi_naik": None,
                               "porsi_turun": None, "patahan": "tidak dapat diuji",
                               "keterangan": f"hanya {len(rel)} provinsi punya angka di kedua periode (minimal {minimal})"})
                 continue
             amb = K.ANOMALI["lompat_relatif"]
             naik, turun = (rel > amb).mean(), (rel < -amb).mean()
             patah = max(naik, turun) >= K.ANOMALI["porsi_patahan"]
-            hasil.append({"seri_kode": seri, "pergantian": f"{a}→{b}", "provinsi": len(rel),
+            hasil.append({"seri_kode": seri, "pergantian": f"{a}â†’{b}", "provinsi": len(rel),
                           "porsi_naik": round(naik, 2), "porsi_turun": round(turun, 2),
                           "patahan": "ya" if patah else "tidak",
-                          "keterangan": f"ambang lompat {amb:.0%}, porsi serentak ≥ {K.ANOMALI['porsi_patahan']:.0%}"})
+                          "keterangan": f"ambang lompat {amb:.0%}, porsi serentak â‰¥ {K.ANOMALI['porsi_patahan']:.0%}"})
     return pd.DataFrame(hasil)
 
 
@@ -112,12 +112,14 @@ def jalankan(silver, mentah, calon):
     parsial = getattr(K, "CAKUPAN_PARSIAL", {})
     wil = patahan_wilayah(silver)
     kunci_wil = {(r.seri_kode, r.wilayah_kode, r.periode) for r in wil.itertuples()}
-    tahun_patah = {(r.seri_kode, r.pergantian.split("→")[1]) for r in patah.itertuples() if r.patahan == "ya"}
+    tahun_patah = {(r.seri_kode, r.pergantian.split("â†’")[1]) for r in patah.itertuples() if r.patahan == "ya"}
     kunci_galat = {(r.seri_kode, r.wilayah_kode, r.periode) for r in galat.itertuples()}
+
     kat = []
     for lbl, seri, _ in deret.daftar():
         for per in definisi.get(seri, {}):
             tahun_patah.add((lbl, per))
+
     for r in calon.itertuples():
         dasar = deret.dasar(r.seri_kode)
         if (r.seri_kode, r.wilayah_kode, r.periode) in kunci_galat:
@@ -137,8 +139,48 @@ def jalankan(silver, mentah, calon):
             k, t, b = "patahan_seri", "tandai; cari catatan metode", "sebagian besar provinsi melompat ke arah sama"
         else:
             k, t, b = "outlier", "tandai, nilai tidak diubah", "menyimpang dari provinsi lain; tidak ada bukti galat atau patahan"
+
         kat.append({**r._asdict(), "kategori": k, "tindakan": t, "bukti": b})
+
     kat = pd.DataFrame(kat).drop(columns=["Index"], errors="ignore")
+
+    # Tambahkan patahan wilayah yang belum masuk calon anomali IQR.
+    lab = deret.berlabel(silver)
+    kunci_ada = {
+        (str(r.seri_kode), str(r.wilayah_kode), str(r.periode))
+        for r in kat.itertuples()
+    }
+
+    tambahan = []
+    for r in wil.itertuples():
+        kunci = (str(r.seri_kode), str(r.wilayah_kode), str(r.periode))
+        if kunci in kunci_ada:
+            continue
+
+        observasi = lab[
+            (lab["seri_kode"] == r.seri_kode)
+            & (lab["wilayah_kode"] == r.wilayah_kode)
+            & (lab["periode"].astype(str) == str(r.periode))
+        ]
+
+        if observasi.empty:
+            continue
+
+        o = observasi.iloc[0].to_dict()
+        o["_14"] = o.pop("_berkas_raw")
+        o["_15"] = o.pop("_sha256_raw")
+        o.update({
+            "berulang": False,
+            "arah": "normal",
+            "kategori": "patahan_wilayah",
+            "tindakan": "tandai; jangan bandingkan induk sebelum dan sesudah pemekaran",
+            "bukti": "provinsi induk kehilangan wilayah pemekaran pada periode ini"
+        })
+        tambahan.append(o)
+
+    if tambahan:
+        kat = pd.concat([kat, pd.DataFrame(tambahan)], ignore_index=True)
+
     kat.to_csv(ROOT / "reports" / "anomali.csv", index=False)
     fmt = bandingkan_format_bps(mentah)
     kembar = int(silver.duplicated(["sumber", "seri_kode", "wilayah_kode", "periode", "rincian", "_berkas_raw"]).sum())
@@ -176,4 +218,4 @@ def jalankan(silver, mentah, calon):
         f"## Kunci Silver kembar: {kembar}",
     ]))
     return kat
-    
+

@@ -5,7 +5,6 @@ import pandas as pd
 
 from src import konfigurasi as K
 from src import wilayah as W
-from src.ekstraksi.who_gho import kolom_nilai
 from src.laporan import ROOT, catat
 
 KOLOM = ["sumber", "seri_kode", "wilayah_kode", "nama_wilayah", "periode", "jenis_periode", "rincian", "nilai",
@@ -188,45 +187,93 @@ def dari_wdi(mentah):
 ABAIKAN_DIM = {"DIM_TIME", "DIM_TIME_TYPE", "DIM_GEO_CODE_M49", "DIM_GEO_CODE_TYPE", "DIM_PUBLISH_STATE_CODE"}
 
 
+
 def dari_who(mentah):
+    from src.ekstraksi.who_gho import kolom_nilai
+
     potong, kosong, cakupan = [], 0, {}
+
     for jalur, d in mentah["who_csv"].items():
         seri = d["IND_CODE"].unique()
+
         if len(seri) != 1 or seri[0] not in K.SERI:
-            raise ValueError(f"{jalur}: IND_CODE {list(seri)} bukan satu seri kasus")
+            raise ValueError(
+                f"{jalur}: IND_CODE {list(seri)} bukan satu seri kasus"
+            )
+
         seri = seri[0]
+
         if set(d["DIM_TIME_TYPE"]) != {"YEAR"}:
-            raise ValueError(f"{jalur}: DIM_TIME_TYPE {set(d['DIM_TIME_TYPE'])}; hanya YEAR yang ditangani")
+            raise ValueError(
+                f"{jalur}: DIM_TIME_TYPE {set(d['DIM_TIME_TYPE'])}; "
+                "hanya YEAR yang ditangani"
+            )
+
         kn = kolom_nilai(d)
-        nilai = pd.to_numeric(d[kn["nilai"]].replace("", np.nan), errors="coerce")
+        nilai = pd.to_numeric(
+            d[kn["nilai"]].replace("", np.nan),
+            errors="coerce"
+        )
+
         kosong += int(nilai.isna().sum())
-        dims = [k for k in d.columns if k.startswith("DIM_") and k not in ABAIKAN_DIM]
-        # dimensi yang hanya punya satu nilai di seluruh berkas adalah bagian definisi seri (docs/seri.csv)
+
+        dims = [
+            k for k in d.columns
+            if k.startswith("DIM_") and k not in ABAIKAN_DIM
+        ]
+
         tetap = [k for k in dims if d[k].nunique() == 1]
         cakupan[seri] = {k: d[k].iloc[0] for k in tetap}
+
         berubah = [k for k in dims if k not in tetap]
         rinci = []
+
         for _, r in d[berubah].iterrows():
             pas = []
+
             for k in berubah:
                 v = r[k].strip()
+
                 if v in K.RINCIAN_TOTAL_WHO:
                     continue
+
                 v = K.RINCIAN_NILAI.get(k, {}).get(v, v)
                 pas.append((K.RINCIAN_DIMENSI.get(k, k.lower()), v))
+
             rinci.append(rincian_teks(pas))
+
         bagian = pd.DataFrame({
-            "sumber": "who_gho", "seri_kode": seri,
-            "wilayah_kode": [W.dari_negara("who_gho", c) for c in d["DIM_GEO_CODE_M49"]],
-            "periode": d["DIM_TIME"].astype(str).values, "jenis_periode": "tahun", "rincian": rinci,
+            "sumber": "who_gho",
+            "seri_kode": seri,
+            "wilayah_kode": [
+                W.dari_negara("who_gho", c)
+                for c in d["DIM_GEO_CODE_M49"]
+            ],
+            "periode": d["DIM_TIME"].astype(str).values,
+            "jenis_periode": "tahun",
+            "rincian": rinci,
             "nilai": nilai.values,
-            "batas_bawah": pd.to_numeric(d[kn["bawah"]], errors="coerce").values if kn["bawah"] else np.nan,
-            "batas_atas": pd.to_numeric(d[kn["atas"]], errors="coerce").values if kn["atas"] else np.nan,
-            "_berkas_raw": d["_berkas_raw"].values, "_sha256_raw": d["_sha256_raw"].values})
+            "batas_bawah": (
+                pd.to_numeric(d[kn["bawah"]], errors="coerce").values
+                if kn["bawah"] else np.nan
+            ),
+            "batas_atas": (
+                pd.to_numeric(d[kn["atas"]], errors="coerce").values
+                if kn["atas"] else np.nan
+            ),
+            "_berkas_raw": d["_berkas_raw"].values,
+            "_sha256_raw": d["_sha256_raw"].values
+        })
+
         potong.append(bagian[bagian["nilai"].notna()])
+
+    if not potong:
+        return pd.DataFrame(), kosong, cakupan, (0, 0)
+
     out = pd.concat(potong, ignore_index=True)
     out, kembar, tentang = buang_kembar_setara(out)
     out["nama_wilayah"] = out["wilayah_kode"].map(W.NAMA)
+
     return out, kosong, cakupan, (kembar, tentang)
 
 
