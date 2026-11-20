@@ -1,8 +1,10 @@
 {
   "metrik": {
     "seri_panel": 4,
+    "seri_silver": 6,
     "rincian_dienkode": 1,
-    "baris_koreksi_satuan": 391
+    "baris_koreksi_satuan": 391,
+    "baris_silver": 1645
   },
   "seed": 0,
   "data_hash": "322ae8bff3296c1c0cf2a61e4319b08e6d9dcf8283d3da8c38d0d0b2781bbdef",
