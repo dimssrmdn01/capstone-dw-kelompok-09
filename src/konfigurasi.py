@@ -5,12 +5,12 @@ SERI = {
         "sumber": "bps",
         "sdg": "4.2.2",
         "tingkat": "provinsi",
-        "satuan": "tidak_dinyatakan",
-        "katalog_satuan": "Tidak tercantum",
+        "satuan": "persen",
+        "katalog_satuan": "tidak_ada",
         "katalog_sdg": "4.2.2",
-        "bukti_satuan": "Kolom satuan pada CSV BPS tidak mencantumkan satuan.",
-        "bukti_sdg": "Pemetaan indikator PAUD pada konfigurasi Kasus 09; perlu verifikasi dokumen definisi.",
-        "nama": "Angka Partisipasi Kasar PAUD usia 3-6 tahun",
+        "bukti_satuan": "Field unit di manifest_asal.json dan var.unit di sdg4_apk_paud.json kosong (''), namun judul resmi Angka Partisipasi Kasar (APK) Susenas BPS (SDG 4.2.2) dan catatan var.note merujuk ukuran dalam satuan persen.",
+        "bukti_sdg": "Metadata sumber BPS sdg4_apk_paud.json (SDG 4.2.2).",
+        "nama": "Angka Partisipasi Kasar (APK) Anak Yang Mengikuti PAUD Menurut Provinsi",
     },
     "var1451": {
         "sumber": "bps",
@@ -19,9 +19,9 @@ SERI = {
         "satuan": "persen",
         "katalog_satuan": "Persen",
         "katalog_sdg": "4.4.1",
-        "bukti_satuan": "Kolom satuan pada CSV BPS mencantumkan Persen.",
-        "bukti_sdg": "Pemetaan indikator TIK usia 15-24 tahun pada konfigurasi Kasus 09; perlu verifikasi dokumen definisi.",
-        "nama": "Proporsi keterampilan TIK usia 15-24 tahun",
+        "bukti_satuan": "Kolom satuan pada CSV BPS dan var.unit pada JSON BPS mencantumkan Persen.",
+        "bukti_sdg": "Metadata sumber BPS sdg4_4_4_1_a_v1451.json (SDG 4.4.1).",
+        "nama": "Proporsi Remaja dan Dewasa (Usia 15-24 Tahun) dengan Keterampilan TIK Menurut Provinsi",
     },
     "var1447": {
         "sumber": "bps",
@@ -30,9 +30,9 @@ SERI = {
         "satuan": "persen",
         "katalog_satuan": "Persen",
         "katalog_sdg": "4.4.1",
-        "bukti_satuan": "Kolom satuan pada CSV BPS mencantumkan Persen.",
-        "bukti_sdg": "Pemetaan indikator TIK usia 15-59 tahun pada konfigurasi Kasus 09; perlu verifikasi dokumen definisi.",
-        "nama": "Proporsi keterampilan TIK usia 15-59 tahun",
+        "bukti_satuan": "Kolom satuan pada CSV BPS dan var.unit pada JSON BPS mencantumkan Persen.",
+        "bukti_sdg": "Metadata sumber BPS sdg4_4_4_1_b_v1447.json (SDG 4.4.1).",
+        "nama": "Proporsi Remaja dan Dewasa (Usia 15-59 Tahun) dengan Keterampilan TIK Menurut Provinsi",
     },
     "var1221": {
         "sumber": "bps",
@@ -41,17 +41,41 @@ SERI = {
         "satuan": "persen",
         "katalog_satuan": "Persen",
         "katalog_sdg": "5.b.1",
-        "bukti_satuan": "Kolom satuan pada CSV BPS mencantumkan Persen.",
-        "bukti_sdg": "Pemetaan indikator kepemilikan telepon genggam pada konfigurasi Kasus 09; perlu verifikasi dokumen definisi.",
-        "nama": "Proporsi individu usia 5 tahun ke atas yang memiliki telepon genggam",
+        "bukti_satuan": "Kolom satuan pada CSV BPS dan var.unit pada JSON BPS mencantumkan Persen.",
+        "bukti_sdg": "Metadata sumber BPS sdg5_5_b_1_v1221.json (SDG 5.b.1).",
+        "nama": "Proporsi Individu yang Menguasai/Memiliki Telepon Genggam Menurut Provinsi",
+    },
+    "SE.PRE.ENRR": {
+        "sumber": "wdi",
+        "sdg": "4.2.2",
+        "tingkat": "nasional",
+        "satuan": "persen",
+        "katalog_satuan": "% gross",
+        "katalog_sdg": "4.2.2",
+        "bukti_satuan": "Metadata resmi WDI (sumber2_indikator.json): School enrollment, preprimary (% gross).",
+        "bukti_sdg": "Metadata WDI indikator SE.PRE.ENRR.",
+        "nama": "School enrollment, preprimary (% gross)",
+    },
+    "IT.NET.USER.ZS": {
+        "sumber": "wdi",
+        "sdg": "17.8.1",
+        "tingkat": "nasional",
+        "satuan": "per 100 orang",
+        "katalog_satuan": "% of population",
+        "katalog_sdg": "17.8.1",
+        "bukti_satuan": "Metadata resmi WDI (sumber46_indikator.json): Individuals using the Internet (% of population).",
+        "bukti_sdg": "Metadata WDI indikator IT.NET.USER.ZS.",
+        "nama": "Individuals using the Internet (% of population)",
     },
 }
-# Semua indikator BPS memiliki satu rincian utama.
+
 DERET = {
     "var1439": ["total"],
     "var1451": ["total"],
     "var1447": ["total"],
     "var1221": ["total"],
+    "SE.PRE.ENRR": ["total"],
+    "IT.NET.USER.ZS": ["total"],
 }
 
 FORMAT_BPS = "csv"
@@ -70,12 +94,14 @@ TIDAK_TERBIT = {}
 
 RENTANG = {
     "persen": (0, 100),
+    "per 100 orang": (0, 100),
 }
 
 ANOMALI = {
+    "k_iqr": 1.5,
     "lompat_relatif": 0.50,
+    "min_titik_samping": 5,
     "porsi_patahan": 0.50,
-    "min_provinsi_patahan": 3,
 }
 
 TABEL_STATIS = {}
@@ -86,6 +112,29 @@ RINCIAN_NILAI = {}
 
 RINCIAN_DIMENSI = {}
 
-PASANGAN = []
+PASANGAN = [
+    {
+        "id": "P-01",
+        "utama": "var1439",
+        "pembanding": [("SE.PRE.ENRR", "total")],
+        "alasan_rincian": (
+            "Dipilih agregat nasional (wilayah_kode=9999, rincian=total) karena WDI hanya menyediakan "
+            "data tingkat negara. SE.PRE.ENRR dipilih untuk dibandingkan dengan var1439 (APK PAUD) "
+            "karena sama-sama mengukur Angka Partisipasi Kasar jenjang prasekolah dalam satuan persen "
+            "(irisan tahun 2015-2018), dengan catatan beda cakupan usia (BPS 3-6 tahun vs UIS usia resmi)."
+        ),
+    },
+    {
+        "id": "P-02",
+        "utama": "var1221",
+        "pembanding": [("IT.NET.USER.ZS", "total")],
+        "alasan_rincian": (
+            "Dipilih agregat nasional (wilayah_kode=9999, rincian=total) karena WDI hanya menyediakan "
+            "data tingkat negara. IT.NET.USER.ZS dipilih sebagai pembanding kontekstual bagi var1221 "
+            "(kepemilikan telepon genggam) serta var1447/var1451 (keterampilan TIK) karena tidak tersedia "
+            "seri kepemilikan ponsel identik di WDI dan keduanya merepresentasikan penetrasi digital nasional (irisan 2015-2024)."
+        ),
+    },
+]
 
 URUTAN_BERKAS = []

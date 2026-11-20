@@ -500,7 +500,37 @@ def terapkan_galat(s):
     return s[~buang].reset_index(drop=True), hasil
 
 
+def _siapkan_mentah(mentah):
+    """Konversi DataFrame gabungan hasil ekstraksi menjadi dict sumber untuk bangun.susun()."""
+    if not isinstance(mentah, pd.DataFrame):
+        return mentah
+    b = mentah["_berkas_raw"].astype(str)
+    out = {}
+    mask_bps_json = b.str.startswith("bps/") & b.str.contains("/json/") & b.str.endswith(".json")
+    mask_bps_csv = b.str.startswith("bps/") & b.str.endswith(".csv")
+    mask_wdi_data = b.str.startswith("wdi/") & b.str.contains("/data/") & b.str.endswith(".json")
+    if mask_bps_json.any():
+        d = mentah[mask_bps_json].copy()
+        d["var_id"] = pd.to_numeric(d["var_id"], errors="coerce").astype("Int64").astype(str)
+        out["bps_json"] = d
+    if mask_bps_csv.any():
+        d = mentah[mask_bps_csv].copy()
+        d["var_id"] = pd.to_numeric(d["var_id"], errors="coerce").astype("Int64").astype(str)
+        out["bps_csv"] = d
+    if mask_wdi_data.any():
+        d = mentah[mask_wdi_data].copy()
+        if "indicator_id" not in d.columns and "indicator.id" in d.columns:
+            d["indicator_id"] = d["indicator.id"]
+        if "country_iso3" not in d.columns and "countryiso3code" in d.columns:
+            d["country_iso3"] = d["countryiso3code"]
+        if "country_id" not in d.columns:
+            d["country_id"] = d["country.id"] if "country.id" in d.columns else d.get("countryiso3code")
+        out["wdi_data"] = d
+    return out
+
+
 def susun(mentah):
+    mentah = _siapkan_mentah(mentah)
     """Kembalikan (silver, catatan) — catatan berisi angka dan temuan untuk laporan."""
     bagian, info = [], {"cakupan_who": {}}
     if "bps_json" in mentah or "bps_csv" in mentah:
