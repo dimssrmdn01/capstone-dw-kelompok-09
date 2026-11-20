@@ -21,7 +21,7 @@ def _nilai_kode(item: dict, nama: str, berkas: str) -> str:
 
 
 def _buat_peta_dimensi(objek: dict, berkas: str) -> dict:
-    
+
     dimensi_wajib = ("vervar", "var", "turvar", "tahun", "turtahun")
     for nama in dimensi_wajib:
         if not isinstance(objek.get(nama), list):
@@ -93,7 +93,7 @@ def _ekstrak_objek(objek: dict, berkas: str) -> list[dict]:
 
 
 def baca_satu_json(berkas: str, raw: Path = RAW) -> pd.DataFrame:
-  
+
     raw = Path(raw)
     jalur = raw / berkas
     if not jalur.is_file():
@@ -116,13 +116,13 @@ def baca_satu_json(berkas: str, raw: Path = RAW) -> pd.DataFrame:
 
 
 def baca_semua_json(raw: Path = RAW) -> dict[str, pd.DataFrame]:
-   
+
     return {berkas: baca_satu_json(berkas, raw=raw) for berkas in BERKAS_JSON}
 
 
 
 def main() -> None:
-    
+
     print("=" * 88)
     print("PEMBACA JSON BPS - KASUS 09 / KELOMPOK 9")
     print("=" * 88)

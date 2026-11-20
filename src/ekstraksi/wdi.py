@@ -18,7 +18,7 @@ BERKAS_INDIKATOR_SDG = "wdi/2026-10-20/metadata/sumber46_indikator.json"
 
 
 def _baca_json(raw: Path, berkas: str):
-   
+
     jalur = raw / berkas
     if not jalur.is_file():
         raise FileNotFoundError(f"Berkas WDI tidak ditemukan: {jalur}")
@@ -37,7 +37,7 @@ def _baca_json(raw: Path, berkas: str):
 
 
 def _tambahkan_lineage(df: pd.DataFrame, raw: Path, berkas: str):
-  
+
     hasil = df.copy()
     hasil["_berkas_raw"] = berkas
     hasil["_sha256_raw"] = sha256_raw(berkas, raw=raw)
@@ -45,7 +45,7 @@ def _tambahkan_lineage(df: pd.DataFrame, raw: Path, berkas: str):
 
 
 def _baca_tabel_metadata(raw: Path, berkas: str, kolom_id: str, nilai_id):
-  
+
     _, records = _baca_json(raw, berkas)
     df = pd.json_normalize(records, sep=".")
     if kolom_id not in df.columns:
@@ -56,7 +56,7 @@ def _baca_tabel_metadata(raw: Path, berkas: str, kolom_id: str, nilai_id):
 
 
 def baca_paket_wdi(raw=RAW):
-    
+
     raw = Path(raw)
 
     # Baca katalog sumber terlebih dahulu untuk menentukan sumber indikator.
@@ -117,13 +117,13 @@ def baca_paket_wdi(raw=RAW):
 
 
 def baca_wdi(raw=RAW):
-    
+
     return baca_paket_wdi(raw)["observasi"]
 
 
 
 def _tampilkan_head(judul: str, tabel: pd.DataFrame) -> None:
-   
+
     print(f"5 DATA TERATAS ({judul}):")
     if tabel.empty:
         print("(tidak ada baris setelah filter)")
@@ -137,7 +137,7 @@ def _tampilkan_head(judul: str, tabel: pd.DataFrame) -> None:
 
 
 def main():
-    
+
     raw = Path(RAW)
     print("=" * 88)
     print("PEMBACA WDI - KASUS 09 / KELOMPOK 9")
