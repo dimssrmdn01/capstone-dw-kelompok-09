@@ -7,9 +7,52 @@ import pandas as pd  # noqa: E402
 
 from src import konfigurasi as K  # noqa: E402
 from src import wilayah as W  # noqa: E402
-from src.laporan import GAMBAR, catat, tabel_md, tulis  # noqa: E402
+from src.laporan import GAMBAR, ROOT, catat, tabel_md, tulis  # noqa: E402
 from src.silver import deret  # noqa: E402
 
+def hitung_profil(silver):
+    """Menghitung statistik dasar setiap seri."""
+    lab = deret.berlabel(silver)
+    if lab.empty:
+        return pd.DataFrame()
+
+    hasil = (
+        lab.groupby("seri_kode")
+        .agg(
+            jumlah_data=("nilai", "count"),
+            jumlah_wilayah=("wilayah_kode", "nunique"),
+            jumlah_periode=("periode", "nunique"),
+            minimum=("nilai", "min"),
+            maksimum=("nilai", "max"),
+            rata_rata=("nilai", "mean"),
+            median=("nilai", "median"),
+            standar_deviasi=("nilai", "std"),
+        )
+        .reset_index()
+    )
+    return hasil.round(3)
+
+
+def hitung_profil_wilayah(silver):
+    """Menghitung statistik nilai setiap provinsi pada masing-masing seri."""
+    lab = deret.berlabel(silver)
+    if lab.empty:
+        return pd.DataFrame()
+
+    prov = lab[lab["wilayah_kode"] != W.INDONESIA].copy()
+    hasil = (
+        prov.groupby(["seri_kode", "wilayah_kode"])
+        .agg(
+            jumlah_periode=("nilai", "count"),
+            rata_rata=("nilai", "mean"),
+            median=("nilai", "median"),
+            minimum=("nilai", "min"),
+            maksimum=("nilai", "max"),
+        )
+        .reset_index()
+    )
+    hasil["nama_wilayah"] = hasil["wilayah_kode"].map(W.NAMA)
+    return hasil.round(3)
 
 def seri_utama(silver):
     s = deret.berlabel(silver)
@@ -119,6 +162,29 @@ def gambar(prov, nas):
 
 
 def jalankan(silver):
+
+    profil_seri = hitung_profil(silver)
+    profil_wilayah = hitung_profil_wilayah(silver)
+
+    folder = ROOT / "reports"
+    folder.mkdir(parents=True, exist_ok=True)
+    profil_seri.to_csv(folder / "profil-seri.csv", index=False)
+    profil_wilayah.to_csv(folder / "profil-wilayah.csv", index=False)
+    tulis(
+        "profil.md",
+        "\n\n".join([
+            "# Profil Data Silver",
+            "## Statistik setiap seri",
+            tabel_md(profil_seri),
+            "## Statistik setiap provinsi",
+            tabel_md(profil_wilayah),
+            "## Catatan",
+            "Profil ini bersifat deskriptif. Calon anomali perlu diperiksa "
+            "lebih lanjut sebelum dikategorikan sebagai outlier asli, "
+            "patahan seri, atau galat input.",
+        ])
+    )
+
     prov, nas = seri_utama(silver)
     ring = (prov.groupby(["seri_kode", "periode"])["nilai"]
             .agg(n="size", rerata="mean", simpangan="std", minimum="min",
