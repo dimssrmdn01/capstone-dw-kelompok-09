@@ -10,8 +10,8 @@ Kolom Gold belum didokumentasikan karena akan ditambahkan pada Sprint 2–3.
 |---|---|---|---|---|---|---|
 | `sumber` | `object` (teks) | Nama sumber | Tidak | `bps`, `wdi` pada data yang diperiksa | Nama sumber pada proses ekstraksi; berkas di `data/raw/` | Menunjukkan sumber data indikator. |
 | `seri_kode` | `object` (teks) | Kode seri/indikator | Tidak | Kode seri dari sumber, misalnya `var1221`, `var1439`, `var1447`, `var1451`, `IT.NET.USER.ZS`, `SE.PRE.ENRR` | BPS: metadata/kode seri pada berkas CSV; WDI: kode indikator pada berkas JSON | Identitas indikator dari sumber data. |
-| `wilayah_kode` | `int64` | Kode wilayah BPS dikalikan 100 | Tidak | Kode wilayah hasil standardisasi; contoh `1100` untuk Aceh | Pemetaan kode wilayah berdasarkan keputusan `K-001` pada `log-keputusan.csv` | Kode numerik wilayah yang digunakan pada Silver. |
-| `nama_wilayah` | `object` (teks) | Nama wilayah | Tidak | Nama wilayah yang dipetakan dari kode wilayah | Berkas sumber dan pemetaan wilayah berdasarkan `K-001` | Nama provinsi/wilayah yang bersesuaian dengan `wilayah_kode`. |
+| `wilayah_kode` | `int64` | Kode wilayah BPS dikalikan 100 | Tidak | Kode wilayah hasil standardisasi; contoh `1100` untuk Aceh | Pemetaan kode wilayah berdasarkan keputusan K-001 dan normalisasi nama wilayah K-012 pada log-keputusan.csv. | Kode numerik wilayah yang digunakan pada Silver. |
+| `nama_wilayah` | `object` (teks) | Nama wilayah | Tidak | Nama wilayah yang dipetakan dari kode wilayah | Berkas sumber dan pemetaan wilayah berdasarkan keputusan K-001 serta normalisasi nama wilayah K-012. | Nama provinsi/wilayah yang bersesuaian dengan `wilayah_kode`. |
 | `periode` | `object` (teks) | Tahun/periode | Tidak | Periode yang tersedia pada sumber; contoh `2015` | Kolom periode pada berkas mentah, dinormalisasi pada proses Silver | Menyatakan periode pengamatan indikator. |
 | `jenis_periode` | `object` (teks) | Kategori periode | Tidak | Contoh `tahun` | Standardisasi periode pada proses Silver berdasarkan informasi periode sumber | Menjelaskan jenis periode pengamatan. |
 | `rincian` | `object` (teks) | Kategori rincian | Tidak pada data yang diperiksa | Contoh `total`; kategori mengikuti rincian pada sumber | Kolom rincian/kategori pada berkas mentah jika tersedia; standardisasi Silver | Menjelaskan kelompok atau rincian nilai indikator. |
@@ -51,6 +51,7 @@ Keputusan pengolahan dicatat pada `log-keputusan.csv`. Keputusan yang relevan de
 - `K-009`: kandidat anomali dipertahankan sebagai `outlier_asli`.
 - `K-010`: dua snapshot BPS untuk `var1221` dibandingkan; masing-masing berisi 393 observasi, tanpa perubahan, data eksklusif, maupun kunci duplikat.
 - `K-011`: enam anomali Papua tahun 2024–2025 pada `var1447` dan `var1451` ditandai sebagai `kandidat_patahan_seri` karena perubahan cakupan provinsi.
+- `K-012`: normalisasi nama wilayah dan penambahan alias untuk Kep. Bangka Belitung dan Kep. Riau agar seluruh 38 provinsi dapat dipetakan secara konsisten.
 
 ## Contoh penelusuran satu baris Silver ke berkas mentah
 
