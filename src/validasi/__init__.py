@@ -8,3 +8,4 @@ validasi ditulis ke reports/validasi.md. Data dictionary di docs/data-dictionary
 
 def jalankan(silver, gold):
     raise NotImplementedError("Tahap 8: skema pandera/GE untuk Silver dan Gold")
+
