@@ -78,8 +78,14 @@ def sudah_ada(kode, periode):
 
 
 def dari_nama(nama):
-    """Cari kode provinsi berdasarkan nama."""
-    nama = str(nama).strip().casefold()
+    """Cari kode provinsi berdasarkan nama, termasuk variasi singkatan BPS."""
+    nama = " ".join(str(nama).strip().casefold().replace(".", " ").split())
+
+    alias = {
+        "kep bangka belitung": "kepulauan bangka belitung",
+        "kep riau": "kepulauan riau",
+    }
+    nama = alias.get(nama, nama)
 
     for kode, label in NAMA.items():
         if label.casefold() == nama:
