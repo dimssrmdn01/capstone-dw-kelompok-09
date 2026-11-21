@@ -62,25 +62,46 @@ def dari_bps(mentah):
     else:
         d = mentah["bps_csv"].rename(columns={"periode": "turtahun"}).copy()
         d["seri_kode"] = "var" + d["var_id"]
+
     d = d[d["seri_kode"].isin(K.SERI)]
     d = pilih_snapshot(d)
-    # baris kabupaten/kota (kode tidak berakhiran 00, misalnya 1101) di luar lingkup panel provinsi
-    kode = d["wilayah_id"].astype(int)
-    kabkota = ~(kode.isin(W.NAMA))
-    catat(baris_kabkota_dibuang=int(kabkota.sum()))
-    d = d[~kabkota]
-    per = [periode_bps(t, p) for t, p in zip(d["tahun"], d["turtahun"])]
-    kode = d["wilayah_id"].astype(int)
-    out = pd.DataFrame({
-        "sumber": "bps", "seri_kode": d["seri_kode"].values, "wilayah_kode": kode.values,
-        "nama_wilayah": kode.map(W.NAMA).values,
-        "periode": [p for p, _ in per], "jenis_periode": [j for _, j in per],
-        "rincian": [rincian_bps(s, r) for s, r in zip(d["seri_kode"], d["turvar"])],
-        "nilai": pd.to_numeric(d["nilai"], errors="coerce").values,
-        "_berkas_raw": d["_berkas_raw"].values, "_sha256_raw": d["_sha256_raw"].values})
-    out["rujukan_tahun"] = [K.RUJUKAN_TAHUN.get((s, _tingkat(w))) for s, w in zip(out["seri_kode"], out["wilayah_kode"])]
-    return out
 
+    # Memetakan nama wilayah agar mengikuti kode internal proyek.
+    kode = d["wilayah"].map(W.dari_nama)
+    tidak_dikenal = kode.isna()
+
+    catat(baris_kabkota_dibuang=int(tidak_dikenal.sum()))
+
+    d = d.loc[~tidak_dikenal].copy()
+    kode = kode.loc[~tidak_dikenal].astype(int)
+
+    per = [
+        periode_bps(t, p)
+        for t, p in zip(d["tahun"], d["turtahun"])
+    ]
+
+    out = pd.DataFrame({
+        "sumber": "bps",
+        "seri_kode": d["seri_kode"].values,
+        "wilayah_kode": kode.values,
+        "nama_wilayah": kode.map(W.NAMA).values,
+        "periode": [p for p, _ in per],
+        "jenis_periode": [j for _, j in per],
+        "rincian": [
+            rincian_bps(s, r)
+            for s, r in zip(d["seri_kode"], d["turvar"])
+        ],
+        "nilai": pd.to_numeric(d["nilai"], errors="coerce").values,
+        "_berkas_raw": d["_berkas_raw"].values,
+        "_sha256_raw": d["_sha256_raw"].values
+    })
+
+    out["rujukan_tahun"] = [
+        K.RUJUKAN_TAHUN.get((s, _tingkat(w)))
+        for s, w in zip(out["seri_kode"], out["wilayah_kode"])
+    ]
+
+    return out
 
 def pilih_snapshot(d):
     """Seri BPS yang ada di lebih dari satu snapshot (bps/<tanggal>/...): snapshot terbaru dipakai.
@@ -568,4 +589,3 @@ def susun(mentah):
           who_kosong_dibuang=info.get("who_kosong", 0), who_kembar_setara=info.get("who_kembar", (0, 0))[0],
           who_kembar_bertentangan=info.get("who_kembar", (0, 0))[1])
     return s, info
-    
