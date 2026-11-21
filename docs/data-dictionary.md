@@ -1,88 +1,86 @@
-# Data Dictionary Silver — Kelompok 09
+# Data dictionary — Kelompok 09
 
-## 1. Deskripsi
+Dokumen ini menjelaskan struktur keluaran Silver pada `data/silver/silver.parquet`.
+Informasi tipe data mengacu pada hasil pemeriksaan aktual terhadap berkas Silver.
+Kolom Gold belum didokumentasikan karena akan ditambahkan pada Sprint 2–3.
 
-Data dictionary ini menjelaskan struktur data pada tahap Silver untuk proyek Capstone Data Wrangling Kelompok 09: Keterampilan TIK dan Pendidikan Anak Usia Dini.
+## `data/silver/silver.parquet`
 
-Data Silver disimpan dalam format Parquet pada `data/silver/silver.parquet`. Dataset terdiri dari 1.645 baris dan 15 kolom. Dokumentasi mencakup nama kolom, tipe data, satuan, arti, serta asal data atau keputusan transformasi yang diterapkan.
+| Kolom | Tipe data | Satuan/format | Boleh kosong | Rentang atau nilai sah | Asal (berkas/aturan) | Keterangan |
+|---|---|---|---|---|---|---|
+| `sumber` | `object` (teks) | Nama sumber | Tidak | `bps`, `wdi` pada data yang diperiksa | Nama sumber pada proses ekstraksi; berkas di `data/raw/` | Menunjukkan sumber data indikator. |
+| `seri_kode` | `object` (teks) | Kode seri/indikator | Tidak | Kode seri dari sumber, misalnya `var1221`, `var1439`, `var1447`, `var1451`, `IT.NET.USER.ZS`, `SE.PRE.ENRR` | BPS: metadata/kode seri pada berkas CSV; WDI: kode indikator pada berkas JSON | Identitas indikator dari sumber data. |
+| `wilayah_kode` | `int64` | Kode wilayah BPS dikalikan 100 | Tidak | Kode wilayah hasil standardisasi; contoh `1100` untuk Aceh | Pemetaan kode wilayah berdasarkan keputusan `K-001` pada `log-keputusan.csv` | Kode numerik wilayah yang digunakan pada Silver. |
+| `nama_wilayah` | `object` (teks) | Nama wilayah | Tidak | Nama wilayah yang dipetakan dari kode wilayah | Berkas sumber dan pemetaan wilayah berdasarkan `K-001` | Nama provinsi/wilayah yang bersesuaian dengan `wilayah_kode`. |
+| `periode` | `object` (teks) | Tahun/periode | Tidak | Periode yang tersedia pada sumber; contoh `2015` | Kolom periode pada berkas mentah, dinormalisasi pada proses Silver | Menyatakan periode pengamatan indikator. |
+| `jenis_periode` | `object` (teks) | Kategori periode | Tidak | Contoh `tahun` | Standardisasi periode pada proses Silver berdasarkan informasi periode sumber | Menjelaskan jenis periode pengamatan. |
+| `rincian` | `object` (teks) | Kategori rincian | Tidak pada data yang diperiksa | Contoh `total`; kategori mengikuti rincian pada sumber | Kolom rincian/kategori pada berkas mentah jika tersedia; standardisasi Silver | Menjelaskan kelompok atau rincian nilai indikator. |
+| `nilai` | `float64` | Mengikuti `satuan` | Dapat kosong jika sumber tidak menyediakan nilai | Nilai numerik dari sumber; indikator persentase umumnya 0–100, dengan pengecualian indikator seperti APK yang dapat melebihi 100 | Nilai indikator pada berkas mentah; normalisasi satuan mengacu pada `K-002`, `K-003`, dan `K-004` | Nilai pengamatan indikator. Jangan menerapkan batas 100 secara umum pada APK. |
+| `satuan` | `object` (teks) | Satuan indikator | Dapat kosong jika metadata sumber tidak tersedia | Contoh `persen` dan `per 100 orang` | Metadata sumber dan keputusan normalisasi satuan pada `K-002` sampai `K-004` | Satuan yang menjelaskan cara membaca `nilai`. |
+| `sdg_kode` | `object` (teks) | Kode target/indikator SDG | Dapat kosong jika tidak tersedia pada sumber | Kode SDG sesuai metadata, misalnya `5.b.1` | Metadata/katalog indikator BPS jika tersedia | Menghubungkan seri dengan kode indikator SDG. |
+| `batas_bawah` | `float64` | Mengikuti satuan indikator | Ya | Nilai numerik atau kosong (`NaN`) | Metadata sumber jika tersedia; dipertahankan kosong jika tidak tersedia | Batas bawah/rentang acuan indikator jika disediakan sumber. |
+| `batas_atas` | `float64` | Mengikuti satuan indikator | Ya | Nilai numerik atau kosong (`NaN`) | Metadata sumber jika tersedia; dipertahankan kosong jika tidak tersedia | Batas atas/rentang acuan indikator jika disediakan sumber. |
+| `rujukan_tahun` | `Int64` (integer nullable) | Tahun | Ya | Tahun numerik atau kosong (`<NA>`) | Metadata sumber jika tersedia; dipertahankan kosong jika tidak tersedia | Tahun rujukan yang menyertai indikator jika disediakan sumber. |
+| `_berkas_raw` | `object` (teks) | Path relatif dari berkas mentah | Tidak | Path berkas di bawah `data/raw/` | Diisi oleh proses ekstraksi/provenance pipeline | Menyimpan lokasi berkas mentah asal baris Silver. |
+| `_sha256_raw` | `object` (teks) | SHA-256 heksadesimal | Tidak | Hash SHA-256 dari berkas mentah | Dihitung dari berkas mentah oleh proses ekstraksi/provenance pipeline | Sidik jari berkas mentah untuk memeriksa identitas/integritas sumber. |
 
-## 2. Data Dictionary Kolom Silver
+## Asal berkas sumber yang tercatat
 
-| No. | Nama Kolom | Tipe Data | Satuan | Arti | Asal |
-|---|---|---|---|---|---|
-| 1 | `sumber` | object | - | Menunjukkan sumber data, yaitu BPS atau WDI. | Berkas mentah BPS dan WDI |
-| 2 | `seri_kode` | object | - | Kode unik indikator yang digunakan untuk membedakan setiap seri data. | CSV BPS dan JSON WDI |
-| 3 | `wilayah_kode` | int64 | - | Kode numerik wilayah untuk mengidentifikasi provinsi atau Indonesia. | Kode wilayah BPS; pemetaan wilayah berdasarkan keputusan K-001 |
-| 4 | `nama_wilayah` | object | - | Nama wilayah yang berhubungan dengan kode wilayah. | Berkas mentah BPS dan hasil pemetaan wilayah K-001 |
-| 5 | `periode` | object | Tahun | Menunjukkan periode waktu pengamatan suatu indikator. | Berkas mentah BPS dan WDI |
-| 6 | `jenis_periode` | object | - | Menunjukkan jenis periode pengamatan, misalnya tahunan. | Berkas mentah dan proses standardisasi Silver |
-| 7 | `rincian` | object | - | Menunjukkan kategori atau rincian pengamatan, misalnya total. | Berkas mentah BPS |
-| 8 | `nilai` | float64 | Mengikuti kolom `satuan` | Nilai numerik dari indikator pada wilayah dan periode tertentu. | Berkas mentah BPS dan WDI |
-| 9 | `satuan` | object | Persen atau per 100 orang | Menunjukkan satuan pengukuran indikator. | Metadata sumber dan keputusan K-002, K-003, serta K-004 |
-| 10 | `sdg_kode` | object | - | Kode tujuan atau target indikator Sustainable Development Goals (SDG). | Metadata indikator BPS |
-| 11 | `batas_bawah` | float64 | Mengikuti metadata sumber | Batas bawah nilai indikator jika tersedia. Nilai kosong menunjukkan informasi tidak tersedia. | Metadata atau berkas mentah WDI |
-| 12 | `batas_atas` | float64 | Mengikuti metadata sumber | Batas atas nilai indikator jika tersedia. Nilai kosong menunjukkan informasi tidak tersedia. | Metadata atau berkas mentah WDI |
-| 13 | `rujukan_tahun` | Int64 (nullable) | Tahun | Tahun referensi yang menyertai data jika tersedia. | Metadata atau berkas mentah WDI |
-| 14 | `_berkas_raw` | object | - | Lokasi relatif berkas mentah yang menjadi asal suatu baris data. | Jalur berkas pada `data/raw/` |
-| 15 | `_sha256_raw` | object | - | Nilai hash SHA-256 untuk memverifikasi identitas dan integritas berkas mentah. | Hasil perhitungan hash berkas mentah |
-
-## 3. Asal Data Indikator
-
-Berikut pemetaan indikator Silver terhadap berkas mentah yang digunakan.
-
-| Sumber | Kode Seri | Indikator | Berkas Mentah |
-|---|---|---|---|
-| BPS | `var1221` | Kepemilikan telepon genggam (SDG 5.b.1) | `bps/2026-10-20/sdg5_5_b_1_v1221.csv` |
-| BPS | `var1439` | Angka Partisipasi Kasar PAUD (SDG 4.2.2) | `bps/2026-10-17/sdg4_apk_paud.csv` |
-| BPS | `var1447` | Indikator keterampilan TIK (SDG 4.4.1) | `bps/2026-10-17/sdg4_4_4_1_b_v1447.csv` |
-| BPS | `var1451` | Indikator keterampilan TIK (SDG 4.4.1) | `bps/2026-10-17/sdg4_4_4_1_a_v1451.csv` |
-| WDI | `IT.NET.USER.ZS` | Pengguna internet (% populasi) | `wdi/2026-10-20/data/kelompok-02-hal-01.json` |
-| WDI | `SE.PRE.ENRR` | Angka partisipasi kasar pendidikan prasekolah | `wdi/2026-10-20/data/kelompok-03-hal-01.json` |
-
-## 4. Keputusan Transformasi dan Standardisasi
-
-Beberapa kolom Silver terbentuk melalui keputusan pengolahan data yang dicatat dalam `log-keputusan.csv`.
-
-| ID Keputusan | Seri/Kolom Terkait | Keputusan |
-|---|---|---|
-| K-001 | `wilayah_kode`, `nama_wilayah` | Pemetaan wilayah menggunakan susunan 38 provinsi tahun 2025 berdasarkan kode wilayah BPS. |
-| K-002 | `satuan`, `seri_kode` | Satuan indikator `var1439` dibakukan menjadi persen berdasarkan definisi resmi indikator APK PAUD. |
-| K-003 | `satuan`, `seri_kode` | Satuan indikator `var1447`, `var1451`, dan `var1221` dibakukan menjadi persen. |
-| K-004 | `satuan`, `seri_kode` | Satuan indikator WDI ditetapkan berdasarkan metadata resmi masing-masing indikator. |
-| K-005 | `nilai` | Data yang belum dirinci berdasarkan batas wilayah baru dipertahankan sebagai kategori `batas_lama`. |
-| K-006 | `nilai` | Data pada periode ketika provinsi belum terbentuk dipertahankan sebagai kategori `belum_ada`. |
-| K-007 | `nilai` | Data yang tidak diterbitkan oleh sumber dipertahankan sebagai `missing`, bukan diisi nol. |
-| K-008 | `seri_kode`, `wilayah_kode`, `periode` | Deduplikasi dan penanganan perbedaan nilai antar-snapshot dilakukan dengan mempertahankan riwayat provenance. |
-| K-009 | `nilai` | Kandidat anomali yang tidak terbukti sebagai kesalahan input dipertahankan sebagai `outlier_asli`. |
-| K-010 | `var1221` | Dua snapshot BPS dibandingkan dan dipertahankan sebagai provenance karena tidak ditemukan perubahan nilai. |
-| K-011 | `var1447`, `var1451` | Anomali pada Papua tahun 2024–2025 diklasifikasikan sebagai kandidat patahan seri karena perubahan cakupan wilayah. |
-
-## 5. Contoh Penelusuran Data (Data Lineage)
-
-Setiap baris Silver dapat ditelusuri kembali ke berkas mentah melalui kolom `_berkas_raw` dan `_sha256_raw`.
-
-Contoh salah satu baris pada Silver:
-
-| Atribut | Nilai |
+| Sumber/seri | Berkas mentah |
 |---|---|
-| `sumber` | bps |
-| `seri_kode` | var1221 |
-| `wilayah_kode` | 1100 |
-| `nama_wilayah` | Aceh |
-| `periode` | 2015 |
-| `nilai` | 51.50 |
-| `satuan` | persen |
+| BPS `var1221` | `bps/2026-10-20/sdg5_5_b_1_v1221.csv` |
+| BPS `var1439` | `bps/2026-10-17/sdg4_apk_paud.csv` |
+| BPS `var1447` | `bps/2026-10-17/sdg4_4_4_1_b_v1447.csv` |
+| BPS `var1451` | `bps/2026-10-17/sdg4_4_4_1_a_v1451.csv` |
+| WDI `IT.NET.USER.ZS` | `wdi/2026-10-20/data/kelompok-02-hal-01.json` |
+| WDI `SE.PRE.ENRR` | `wdi/2026-10-20/data/kelompok-03-hal-01.json` |
+
+Path di atas merupakan contoh berkas sumber yang teridentifikasi pada data yang diperiksa. Nilai `_berkas_raw` pada setiap baris menunjukkan berkas asal baris tersebut.
+
+## Keputusan pengolahan yang memengaruhi Silver
+
+Keputusan pengolahan dicatat pada `log-keputusan.csv`. Keputusan yang relevan dengan interpretasi kolom Silver antara lain:
+
+- `K-001`: pemetaan 38 provinsi berdasarkan kode BPS; data historis tidak dialokasikan mundur ke provinsi hasil pemekaran.
+- `K-002`: satuan indikator BPS `var1439` (APK PAUD usia 3–6 tahun) dinormalisasi menjadi persen.
+- `K-003`: satuan indikator BPS `var1447`, `var1451`, dan `var1221` dinormalisasi menjadi persen berdasarkan metadata.
+- `K-004`: satuan WDI `SE.PRE.ENRR` dicatat sebagai persen dan `IT.NET.USER.ZS` sebagai `per 100 orang`.
+- `K-005` dan `K-006`: nilai kosong akibat batas wilayah lama atau wilayah yang belum terbentuk dipertahankan dengan status yang sesuai.
+- `K-007`: nilai kosong karena sumber tidak menerbitkan data dipertahankan sebagai `missing`.
+- `K-008`: penanganan duplikasi mempertimbangkan seri, wilayah, dan periode serta tetap menjaga provenance snapshot/revisi.
+- `K-009`: kandidat anomali dipertahankan sebagai `outlier_asli`.
+- `K-010`: dua snapshot BPS untuk `var1221` dibandingkan; masing-masing berisi 393 observasi, tanpa perubahan, data eksklusif, maupun kunci duplikat.
+- `K-011`: enam anomali Papua tahun 2024–2025 pada `var1447` dan `var1451` ditandai sebagai `kandidat_patahan_seri` karena perubahan cakupan provinsi.
+
+## Contoh penelusuran satu baris Silver ke berkas mentah
+
+Contoh berikut diambil dari salah satu baris Silver yang diperiksa:
+
+| Kolom | Nilai contoh |
+|---|---|
+| `sumber` | `bps` |
+| `seri_kode` | `var1221` |
+| `wilayah_kode` | `1100` |
+| `nama_wilayah` | `Aceh` |
+| `periode` | `2015` |
+| `jenis_periode` | `tahun` |
+| `rincian` | `total` |
+| `nilai` | `51.50` |
+| `satuan` | `persen` |
+| `sdg_kode` | `5.b.1` |
+| `batas_bawah` | kosong (`NaN`) |
+| `batas_atas` | kosong (`NaN`) |
+| `rujukan_tahun` | kosong (`<NA>`) |
 | `_berkas_raw` | `bps/2026-10-20/sdg5_5_b_1_v1221.csv` |
 | `_sha256_raw` | `f7bfe811359de95b1ea3059dd541a54f62130883ac1e615c5f7f9ce33b0ca39b` |
 
-Berdasarkan contoh tersebut, data indikator `var1221` untuk wilayah Aceh pada tahun 2015 berasal dari berkas mentah `sdg5_5_b_1_v1221.csv` pada snapshot 20 Oktober 2026.
+Cara menelusurinya:
 
-Nilai `_sha256_raw` digunakan untuk mencocokkan integritas berkas dengan hash SHA-256 berkas mentah. Dengan demikian, asal setiap baris Silver dapat diperiksa kembali tanpa mengubah berkas Bronze.
+1. Baca nilai `_berkas_raw` untuk mengetahui path relatif berkas mentah asal data.
+2. Cari berkas tersebut di bawah direktori `data/raw/`.
+3. Cocokkan `_sha256_raw` dengan hash SHA-256 berkas mentah untuk memastikan berkas yang digunakan sama dengan berkas sumber yang tercatat.
+4. Gunakan `seri_kode`, `wilayah_kode`, dan `periode` untuk menemukan observasi yang bersesuaian di dalam berkas mentah.
 
-## 6. Catatan
+## data/gold/
 
-- Tipe data yang dicantumkan mengikuti hasil pembacaan aktual `silver.parquet` menggunakan pandas.
-- Tipe `Int64` pada `rujukan_tahun` merupakan tipe integer nullable yang memungkinkan nilai kosong.
-- Nilai kosong pada `batas_bawah`, `batas_atas`, dan `rujukan_tahun` tidak otomatis dianggap sebagai nol.
-- Kolom Gold belum dimasukkan karena dokumentasi ini khusus untuk tahap Silver. Kolom Gold akan ditambahkan pada Sprint 2–3.
-- Seluruh keputusan transformasi dan standardisasi dapat diperiksa kembali melalui `log-keputusan.csv`.
+Kolom Gold akan ditambahkan pada Sprint 2–3 setelah tabel Gold dibentuk. Karena itu, bagian ini belum diisi.
