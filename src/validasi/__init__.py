@@ -1,89 +1,115 @@
-"""Tahap 8 — Validasi dan dokumentasi (pertemuan XIV–XV). Milik tim.
+﻿"""Tahap 8: validasi Silver dan Gold."""
 
-Tulis skema validasi Silver dan Gold (pandera atau Great Expectations): rentang nilai per satuan,
-kelengkapan wilayah, keunikan kunci, konsistensi provinsi vs nasional bila relevan. Laporan
-validasi ditulis ke reports/validasi.md. Data dictionary di docs/data-dictionary.md.
-"""
-
-
-def jalankan(silver, gold):
-    raise NotImplementedError("Tahap 8: skema pandera/GE untuk Silver dan Gold")
-
-
-
-import pandas as pd
 from pathlib import Path
+import pandas as pd
 
 
 def validasi_silver(df):
-    hasil = {}
-
-    # 1. Validasi kolom wajib
-    kolom_wajib = [
-        "sumber", "seri_kode", "wilayah_kode",
-        "periode", "jenis_periode", "rincian",
-        "nilai", "satuan", "_berkas_raw"
+    wajib = [
+        "sumber", "seri_kode", "wilayah_kode", "periode",
+        "jenis_periode", "rincian", "nilai", "satuan",
+        "_berkas_raw", "_sha256_raw",
     ]
 
-    hasil["kolom_wajib"] = all(
-        kolom in df.columns for kolom in kolom_wajib
-    )
+    kurang = [c for c in wajib if c not in df.columns]
+    if kurang:
+        raise ValueError(f"Kolom Silver tidak lengkap: {kurang}")
 
-    if not hasil["kolom_wajib"]:
-        return hasil
+    if df.empty:
+        raise ValueError("Silver kosong.")
 
-    # 2. Validasi nilai persentase
-    seri_persen = ["var1447", "var1451", "var1221"]
-    data_persen = df[df["seri_kode"].isin(seri_persen)]
-
-    hasil["rentang_persen"] = bool(
-        data_persen["nilai"].between(0, 100).all()
-    )
-
-    # 3. Validasi APK PAUD
-    apk = df[df["seri_kode"] == "var1439"]
-
-    hasil["apk_nonnegatif"] = bool(
-        (apk["nilai"] >= 0).all()
-    )
-
-    # 4. Validasi keunikan data
     kunci = [
         "sumber", "seri_kode", "wilayah_kode",
-        "periode", "jenis_periode", "rincian",
-        "_berkas_raw"
+        "periode", "rincian", "_berkas_raw",
+    ]
+    if df.duplicated(kunci).any():
+        raise ValueError("Ditemukan duplikasi kunci Silver.")
+
+    if not pd.api.types.is_numeric_dtype(df["nilai"]):
+        raise ValueError("Kolom nilai Silver harus numerik.")
+
+    seri_persen = ["var1447", "var1451", "var1221"]
+    data_persen = df[df["seri_kode"].isin(seri_persen)]
+    if not data_persen["nilai"].between(0, 100).all():
+        raise ValueError("Nilai indikator persen di luar 0-100.")
+
+    apk = df[df["seri_kode"] == "var1439"]
+    if (apk["nilai"] < 0).any():
+        raise ValueError("Nilai APK PAUD negatif.")
+
+    satuan = df.groupby("seri_kode")["satuan"].nunique()
+    if (satuan > 1).any():
+        raise ValueError("Satuan tidak konsisten dalam satu seri.")
+
+    return True
+
+
+def validasi_gold(gold):
+    wajib = [
+        "panel_provinsi",
+        "panel_provinsi_lebar",
+        "grid_kelengkapan",
+        "nasional",
+        "rekonsiliasi_nasional",
     ]
 
-    hasil["keunikan_silver"] = not df.duplicated(
-        subset=kunci
-    ).any()
+    kurang = [nama for nama in wajib if nama not in gold]
+    if kurang:
+        raise ValueError(f"Tabel Gold tidak lengkap: {kurang}")
 
-    # 5. Validasi konsistensi satuan
-    jumlah_satuan = df.groupby("seri_kode")["satuan"].nunique()
+    panel = gold["panel_provinsi"]
+    kunci = ["seri_kode", "wilayah_kode", "periode"]
 
-    hasil["konsistensi_satuan"] = bool(
-        (jumlah_satuan <= 1).all()
+    if panel.duplicated(kunci).any():
+        raise ValueError("Ditemukan duplikasi sel panel Gold.")
+
+    if not panel["kategori"].isin([
+        "terisi", "missing", "belum_ada",
+        "tidak_diterbitkan", "batas_lama",
+    ]).all():
+        raise ValueError("Kategori grid Gold tidak dikenal.")
+
+    terisi = panel["kategori"] == "terisi"
+    if panel.loc[terisi, "nilai"].isna().any():
+        raise ValueError("Ada sel berstatus terisi tanpa nilai.")
+
+    if panel.loc[~terisi, "nilai"].notna().any():
+        raise ValueError("Ada nilai pada sel yang tidak berstatus terisi.")
+
+    return True
+
+
+def jalankan(silver, gold):
+    hasil = {
+        "validasi_silver": validasi_silver(silver),
+        "validasi_gold": validasi_gold(gold),
+    }
+
+    folder = Path("reports")
+    folder.mkdir(parents=True, exist_ok=True)
+
+    isi = [
+        "# Laporan Validasi",
+        "",
+        "## Hasil pemeriksaan",
+    ]
+
+    for nama, status in hasil.items():
+        isi.append(f"- {nama}: {'LOLOS' if status else 'GAGAL'}")
+
+    isi.extend([
+        "",
+        f"- Jumlah baris Silver: {len(silver):,}",
+        f"- Jumlah sel panel Gold: {len(gold['panel_provinsi']):,}",
+        f"- Jumlah baris rekonsiliasi: {len(gold['rekonsiliasi_nasional']):,}",
+    ])
+
+    (folder / "validasi.md").write_text(
+        "\n".join(isi), encoding="utf-8"
     )
 
-    # Tampilkan hasil
-    print("\n=== HASIL VALIDASI SILVER ===")
-
-    for aturan, status in hasil.items():
-        print(f"{aturan}: {'LOLOS' if status else 'GAGAL'}")
-
-    if not all(hasil.values()):
-        raise ValueError("Validasi Silver gagal!")
-
-    print("\nSemua validasi Silver berhasil!")
+    print("\n=== HASIL VALIDASI ===")
+    for nama, status in hasil.items():
+        print(f"{nama}: {'LOLOS' if status else 'GAGAL'}")
 
     return hasil
-
-
-def jalankan():
-    lokasi = Path("data/silver/silver.parquet")
-
-    df = pd.read_parquet(lokasi)
-
-    print(f"\nData Silver: {len(df)} baris")
-
-    return validasi_silver(df)
