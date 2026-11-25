@@ -55,7 +55,7 @@ Setiap baris hasil ekstraksi membawa informasi asal berkas melalui `_berkas_raw`
 
 ### Perubahan snapshot 17–20 Oktober 2026
 
-Snapshot BPS 17 Oktober dan 20 Oktober 2026 dibandingkan untuk seri `var1221`. Masing-masing snapshot memiliki 393 observasi; seluruh 393 nilai sama, tidak ada nilai berbeda, tidak ada observasi eksklusif, dan tidak ditemukan kunci ganda. Karena isinya identik, kedua snapshot tetap dipertahankan sebagai provenance/audit, bukan salah satunya dihapus. Hasil ini tercatat pada `reports/snapshot-bps.csv` dan keputusan `K-010`.
+Snapshot BPS 17 dan 20 Oktober 2026 dibandingkan untuk seri `var1221`. Masing-masing snapshot memiliki 393 observasi. Seluruh 393 kunci observasi cocok dan nilainya sama; tidak ditemukan nilai berbeda. Pada tahap Silver, snapshot terbaru (20 Oktober 2026) dipilih sebagai sumber observasi, sedangkan snapshot 17 Oktober digunakan sebagai pembanding audit. Hasil perbandingan tercatat pada `reports/snapshot-bps.csv`: 393 sel dibandingkan dan 0 nilai berbeda. Pemilihan snapshot dilakukan melalui `pilih_snapshot()` di tahap Silver. Dengan demikian, Silver hanya membawa 393 observasi dari snapshot yang dipilih, bukan menggandakan kedua snapshot sebagai observasi.
 
 Snapshot WDI yang tercantum pada manifest adalah 20 Oktober 2026. Artefak proyek yang diperiksa tidak menyediakan tabel perbandingan antar-vintage WDI yang cukup untuk menghitung perubahan nilai antar-snapshot. Oleh karena itu, laporan ini tidak menyimpulkan ada atau tidaknya revisi nilai WDI antar-vintage.
 
@@ -66,9 +66,9 @@ Snapshot WDI yang tercantum pada manifest adalah 20 Oktober 2026. Artefak proyek
 | Sel kosong kategori `batas_lama` | 36 sel | Dipertahankan sebagai kosong karena periode tersebut memakai batas wilayah lama dan belum dirinci menurut provinsi hasil pemekaran. | Membagi nilai provinsi induk ke provinsi baru, mengisi nol, atau menghapus sel dari grid. | `K-005` |
 | Sel kosong kategori `belum_ada` | 84 sel | Dipertahankan sebagai kosong karena provinsi belum terbentuk atau belum memiliki data pada periode terkait. | Mengisi nol, interpolasi, atau mengalokasikan nilai provinsi induk. | `K-006` |
 | Sel kosong kategori `missing` | 32 sel | Dipertahankan sebagai missing karena provinsi sudah ada tetapi nilai tidak diterbitkan sumber untuk periode tersebut. | Mengisi nol, memakai nilai tahun sebelumnya, atau memakai nilai provinsi lain. | `K-007` |
-| Kandidat anomali/outlier | 152 catatan anomali: 146 `outlier_asli` dan 6 `kandidat_patahan_seri` pada klasifikasi akhir | Nilai sumber dipertahankan. Sebanyak 146 catatan tetap ditandai sebagai outlier asli; enam catatan Papua pada `var1447` dan `var1451` tahun 2024–2025 diberi status kandidat patahan seri. | Mengubah atau menghapus nilai tanpa bukti galat input; menganggap semua nilai ekstrem sebagai kesalahan. | `K-009`, `K-011` |
-| Dugaan patahan seri Papua | 6 catatan anomali: `ANM-027`, `ANM-028`, `ANM-135`, `ANM-136`, `ANM-137`, `ANM-138` | Ditandai sebagai kandidat patahan seri karena lonjakan bertepatan dengan perubahan cakupan geografis dari 34 menjadi 38 provinsi. Belum dinyatakan sebagai patahan terkonfirmasi karena bukti perubahan definisi/metode belum cukup. | Mempertahankan seluruh catatan sebagai outlier biasa tanpa catatan cakupan; mengoreksi nilai Papua. | `K-011` |
-| Duplikat/konsistensi snapshot `var1221` | 393 observasi per snapshot; 0 nilai berubah, 0 observasi eksklusif, 0 kunci ganda | Kunci deduplikasi adalah `seri_kode`, `wilayah_kode`, dan `periode`. Snapshot bernilai sama tetap disimpan sebagai provenance. | Menghapus salah satu snapshot atau menimpa snapshot lama tanpa riwayat. | `K-008`, `K-010` |
+| Kandidat anomali | 188 penanda anomali pada hasil terbaru | Nilai sumber tetap dipertahankan dan penanda anomali dibawa ke Gold. Klasifikasi akhir terdiri atas 100 `perbedaan_struktural`, 80 `outlier`, dan 8 `patahan_wilayah`. | Menghapus atau mengoreksi nilai hanya karena terdeteksi anomali tanpa bukti kesalahan sumber. | `reports/anomali.csv` |
+| Dugaan patahan seri Papua | Kandidat yang tercatat pada analisis anomali | Lonjakan pada seri TIK di wilayah Papua ditinjau dengan memperhatikan perubahan cakupan geografis dari 34 menjadi 38 provinsi. Penanda anomali dipertahankan untuk pemeriksaan lanjutan dan tidak digunakan sebagai alasan otomatis untuk menghapus nilai. | Mengoreksi nilai Papua tanpa bukti perubahan definisi atau kesalahan input. | `reports/anomali.csv`; `K-011` |
+| Duplikat/konsistensi snapshot `var1221` | 393 sel dibandingkan; 0 nilai berbeda | Kunci deduplikasi adalah `seri_kode`, `wilayah_kode`, dan `periode`. Snapshot terbaru dipilih pada tahap Silver; snapshot lama digunakan sebagai pembanding audit. | Menghapus salah satu snapshot atau menimpa snapshot lama tanpa riwayat. | `K-008`, `K-010` |
 | Standardisasi satuan/format indikator | 391 baris untuk `var1439`; 0 baris terdampak untuk seri lain menurut log | `var1439` dibakukan menjadi `persen` berdasarkan definisi resmi APK PAUD BPS. `var1447`, `var1451`, dan `var1221` diseragamkan menjadi `persen`; WDI `SE.PRE.ENRR` menjadi `persen` dan `IT.NET.USER.ZS` menjadi `per 100 orang`. | Membiarkan satuan kosong/tidak seragam atau menebak satuan hanya dari rentang angka tanpa memeriksa definisi dan metadata. | `K-002`, `K-003`, `K-004` |
 | Galat nilai di luar rentang satuan | 0 baris | Tidak ditemukan nilai di luar rentang satuan pada pemeriksaan Silver; tidak ada koreksi nilai berdasarkan uji rentang. | Mengubah nilai yang hanya tampak ekstrem tanpa bukti salah input. | `reports/anomali.md`; validasi |
 | Pemetaan wilayah dan perubahan batas | `K-001`: dampak 0 baris dialokasikan ulang; `K-012`: 88 baris bertambah ke Silver setelah dua alias wilayah dipetakan | Wilayah dipetakan memakai kode BPS pada susunan 38 provinsi tahun 2025. Data historis tidak dialokasikan ulang ke provinsi hasil pemekaran. Nama Kep. Bangka Belitung dan Kep. Riau dinormalisasi melalui alias ke nama kanonis. | Mengalokasikan data historis ke provinsi baru dengan asumsi/bobot; menambahkan baris provinsi secara manual; mengandalkan nama mentah tanpa normalisasi. | `K-001`, `K-012` |
@@ -86,6 +86,16 @@ Seri pembanding WDI hanya tersedia pada tingkat nasional (Indonesia/IDN), sehing
 | `var1447` dan `var1451` — keterampilan TIK menurut kelompok umur | `IT.NET.USER.ZS` | 2015–2024 (10 tahun) | Pembanding konteks digital, bukan ukuran yang sama. Penggunaan internet tidak otomatis menunjukkan keterampilan TIK. |
 
 WDI `SE.PRE.ENRR` memiliki 49 nilai terisi dari 66 observasi dan mencakup tahun 1970–2018. WDI `IT.NET.USER.ZS` memiliki 32 nilai terisi dari 66 observasi dan mencakup 1990 serta 1994–2024. Untuk periode survei utama, `SE.PRE.ENRR` tersedia pada 2015–2018, sedangkan `IT.NET.USER.ZS` tersedia pada 2015–2024. Nilai WDI tahun 2025 belum tersedia pada snapshot yang diperiksa.
+
+### Seleksi dan pembentukan data Gold
+
+Tahap Gold memilih observasi dari Silver untuk membentuk tabel analitis yang konsisten. Seleksi menggunakan enam seri yang telah ditetapkan dalam konfigurasi, yaitu empat seri BPS dan dua seri WDI. Observasi yang digunakan adalah periode tahunan dengan rincian `total` (termasuk padanan rincian total yang telah dinormalisasi).
+
+Kunci observasi yang digunakan adalah kombinasi `seri_kode`, `wilayah_kode`, dan `periode`. Jika terdapat duplikasi dengan nilai sama, pemilihan dilakukan secara deterministik berdasarkan identitas berkas sumber. Jika ditemukan nilai berbeda pada kunci yang sama, proses dihentikan agar konflik tidak tersembunyi. Seleksi juga mencatat keputusan per seri pada `log-keputusan.csv` dengan ID K-013 sampai K-018. Pada hasil pipeline terakhir, seluruh 1.653 baris Silver terpilih sehingga jumlah baris yang tidak dipilih oleh aturan Gold adalah 0.
+
+Panel provinsi dibentuk berdasarkan wilayah dan periode, dengan indikator sebagai nilai pengamatan. Panel lebar menyajikan masing-masing seri sebagai kolom. Grid kelengkapan tetap dipakai untuk menunjukkan sel yang tidak memiliki nilai; sel kosong tidak diisi dengan nol atau hasil imputasi. Data nasional dibentuk terpisah dari observasi Indonesia (`wilayah_kode=9999`) dengan rincian `total`, kemudian digunakan untuk rekonsiliasi BPS dan WDI.
+
+Penanda anomali dari `reports/anomali.csv` ikut dibawa ke observasi Gold melalui kolom `anomaly_flag`, `kategori_anomali`, `tindakan_anomali`, dan `bukti_anomali`. Penanda tersebut berfungsi sebagai informasi kualitas data, bukan perintah untuk menghapus observasi. Hasil akhir memuat 188 observasi berpenanda anomali: 100 `perbedaan_struktural`, 80 `outlier`, dan 8 `patahan_wilayah`.
 
 ### Penjelasan selisih dan keterbatasan perbandingan
 
@@ -116,14 +126,17 @@ Validasi dilakukan pada `data/silver/silver.parquet`. `reports/validasi.md` menc
 | Konsistensi satuan | Lolos |
 | **Total** | **5 dari 5 aturan lolos** |
 
+Validasi Gold juga dinyatakan **LOLOS**. Pemeriksaan Gold mencakup keberadaan tabel keluaran yang diwajibkan, keunikan kunci panel, kategori kelengkapan yang valid, serta konsistensi antara kategori sel dan kondisi nilai terisi atau kosong. Hasil pipeline terakhir menghasilkan 1.672 sel panel provinsi, 418 baris panel lebar, dan 14 baris rekonsiliasi nasional.
+
 Pemeriksaan anomali juga mencatat 0 galat input di luar rentang satuan. Ini tidak berarti seluruh nilai ekstrem merupakan nilai yang sudah terverifikasi secara substantif; catatan outlier dan kandidat patahan tetap dipertahankan untuk peninjauan.
 
 ### Reproduksibilitas dan keterbatasan bukti performa
 
 Repositori menyediakan perintah pipeline `python pipeline.py` sebagai pembangkit laporan profiling, grid kelengkapan, pembanding, metadata, dan anomali. Catatan sprint NIM 124450030 menyebut ekstraksi membaca 17 berkas dan menghasilkan 4.146 baris mentah. Hasil validasi Silver terbaru yang dilaporkan adalah 1.653 baris dengan lima aturan validasi lolos.
 
-Namun, pada artefak repositori yang diperiksa tidak ditemukan catatan waktu eksekusi `python pipeline.py` dari kondisi nol maupun hasil benchmark yang membandingkan Pandas dengan DuckDB/Dask. Karena itu, waktu pipeline dan klaim metode mana yang lebih cepat tidak dicantumkan agar tidak mengarang hasil. Folder `data/gold/` pada arsip yang diperiksa hanya memuat `.gitkeep`; keluaran Gold tidak tersedia dalam ZIP ini untuk diverifikasi. Keterbatasan tersebut perlu dilengkapi dengan menjalankan benchmark dan memastikan artefak Gold sudah di-*commit* sebelum laporan dinyatakan lengkap secara keseluruhan.
+Pipeline dapat dijalankan melalui `python pipeline.py`. Pada eksekusi terakhir, pipeline berhasil menyelesaikan ekstraksi, Silver, Gold, dan validasi. Hasilnya mencakup 1.653 baris Silver, 1.653 observasi terpilih di Gold, 1.672 sel panel provinsi, 418 baris panel lebar, dan 14 baris rekonsiliasi nasional. `validasi_silver` dan `validasi_gold` sama-sama LOLOS.
 
+Artefak Gold yang dihasilkan meliputi `observasi_terpilih.parquet`, `panel_provinsi.parquet`, `panel_provinsi_lebar.parquet`, `grid_kelengkapan.parquet`, `nasional.parquet`, dan `rekonsiliasi_nasional.parquet`, serta basis data `gold.sqlite`. Artefak-artefak tersebut telah dimasukkan ke commit implementasi Gold. Waktu eksekusi dari kondisi nol dan benchmark Pandas dibandingkan DuckDB/Dask belum dicatat, sehingga tidak dibuat klaim performa yang belum didukung pengukuran.
 ## Pembagian kerja
 
 | Anggota | NIM | Komponen | Tugas sampingan | Bagian laporan yang ditulis |
