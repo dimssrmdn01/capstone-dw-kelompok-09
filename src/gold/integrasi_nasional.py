@@ -1,55 +1,76 @@
-﻿"""Tahap 6: Integrasi dan rekonsiliasi pembanding nasional dari lapis Silver (Kelompok 9)."""
-from pathlib import Path
+﻿"""Tahap 6: integrasi dan rekonsiliasi pembanding nasional."""
+
 import pandas as pd
+from src import konfigurasi as K
 
 
-def buat_tabel_nasional_dari_silver(df_silver: pd.DataFrame) -> pd.DataFrame:
-    """Menyaring observasi nasional (wilayah_kode == 9999) dari Silver menjadi tabel periode x seri."""
+def buat_tabel_nasional_dari_silver(df_silver):
     nasional = df_silver[
-        (df_silver["wilayah_kode"] == 9999) & (df_silver["rincian"] == "total")
+        (df_silver["wilayah_kode"] == 9999)
+        & (df_silver["rincian"] == "total")
     ].copy()
+
     nasional["periode"] = nasional["periode"].astype(str)
+
+    kunci = ["seri_kode", "wilayah_kode", "periode"]
+    duplikat = nasional.duplicated(kunci, keep=False)
+    if duplikat.any():
+        raise ValueError(
+            "Tabel nasional masih memiliki kunci ganda setelah seleksi:\n"
+            + nasional.loc[duplikat, kunci].head(10).to_string(index=False)
+        )
+
     return (
-        nasional.pivot_table(
+        nasional.pivot(
             index="periode",
             columns="seri_kode",
             values="nilai",
-            aggfunc="first",
         )
         .sort_index()
     )
 
 
-def buat_tabel_rekonsiliasi(tabel_nasional: pd.DataFrame) -> pd.DataFrame:
-    """Menyusun tabel rekonsiliasi pasangan wajib Kelompok 9 beserta kategori selisih."""
-    pasangan = [
-        ("var1439 vs SE.PRE.ENRR", "var1439", "SE.PRE.ENRR", "Definisi berbeda"),
-        ("var1221 vs IT.NET.USER.ZS", "var1221", "IT.NET.USER.ZS", "Definisi berbeda"),
-    ]
+def buat_tabel_rekonsiliasi(tabel_nasional):
     hasil = []
-    for label, utama, pembanding, kategori in pasangan:
-        if utama not in tabel_nasional.columns or pembanding not in tabel_nasional.columns:
+
+    for pasangan in K.PASANGAN:
+        utama = pasangan["utama"]
+
+        if utama not in tabel_nasional.columns:
             continue
-        sub = tabel_nasional[[utama, pembanding]].dropna().reset_index()
-        for _, r in sub.iterrows():
-            hasil.append({
-                "pasangan": label,
-                "periode": r["periode"],
-                "seri_utama": utama,
-                "nilai_seri_utama": float(r[utama]),
-                "seri_pembanding": pembanding,
-                "nilai_pembanding": float(r[pembanding]),
-                "selisih": round(float(r[utama]) - float(r[pembanding]), 4),
-                "kategori_penjelasan": kategori,
-            })
+
+        for pembanding, rincian in pasangan["pembanding"]:
+            if pembanding not in tabel_nasional.columns:
+                continue
+
+            sub = tabel_nasional[[utama, pembanding]].dropna()
+
+            for periode, baris in sub.iterrows():
+                nilai_utama = float(baris[utama])
+                nilai_pembanding = float(baris[pembanding])
+
+                hasil.append({
+                    "pasangan": pasangan["id"],
+                    "periode": str(periode),
+                    "seri_utama": utama,
+                    "nilai_seri_utama": nilai_utama,
+                    "seri_pembanding": pembanding,
+                    "rincian_pembanding": rincian,
+                    "nilai_pembanding": nilai_pembanding,
+                    "selisih": round(
+                        nilai_utama - nilai_pembanding, 4
+                    ),
+                    "alasan_perbandingan": pasangan["alasan_rincian"],
+                })
+
     return pd.DataFrame(hasil)
 
 
 if __name__ == "__main__":
-    silver_path = Path("data/silver/silver.parquet")
-    if silver_path.exists():
-        df_s = pd.read_parquet(silver_path)
-        tabel = buat_tabel_nasional_dari_silver(df_s)
-        print(buat_tabel_rekonsiliasi(tabel).to_string(index=False))
-    else:
-        print("OK: Modul integrasi siap dipanggil dari src/gold/__init__.py setelah silver.parquet tersedia.")
+    from pathlib import Path
+
+    lokasi = Path("data/silver/silver.parquet")
+    if lokasi.exists():
+        df = pd.read_parquet(lokasi)
+        nasional = buat_tabel_nasional_dari_silver(df)
+        print(buat_tabel_rekonsiliasi(nasional).to_string(index=False))
