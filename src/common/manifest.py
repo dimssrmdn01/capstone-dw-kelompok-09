@@ -21,11 +21,18 @@ def sha256(path):
     return h.hexdigest()
 
 
+
 @lru_cache(maxsize=None)
 def baca(raw=RAW):
     """{berkas relatif data/raw: sha256} dari MANIFEST.csv."""
     with open(Path(raw) / "MANIFEST.csv", encoding="utf-8") as f:
-        return {r["berkas"]: r["sha256"] for r in csv.DictReader(f)}
+        return {
+            r["berkas"].strip(): r["sha256"].strip()
+            for r in csv.DictReader(f)
+            if r.get("berkas", "").strip()
+            and r.get("sha256", "").strip()
+        }
+
 
 
 def sha256_raw(berkas, raw=RAW):
