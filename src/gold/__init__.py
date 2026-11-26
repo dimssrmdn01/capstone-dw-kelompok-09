@@ -84,7 +84,7 @@ def jalankan(silver):
         "panel_provinsi": panel,
         "panel_provinsi_lebar": panel_lebar,
         "grid_kelengkapan": grid_lengkap,
-        "nasional": nasional.reset_index(),
+        "nasional": nasional,
         "rekonsiliasi_nasional": rekonsiliasi,
     }
 

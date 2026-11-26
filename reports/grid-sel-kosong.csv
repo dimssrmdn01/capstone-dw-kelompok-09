@@ -1,153 +1,145 @@
 seri_kode,periode,wilayah_kode,nama_wilayah,tingkat,kategori,bukti
-var1439,2015,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2015; angka tidak dipecah
 var1439,2015,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1439,2015,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2015,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2015,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1439,2016,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2016; angka tidak dipecah
 var1439,2016,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1439,2016,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2016,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2016,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1439,2017,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2017; angka tidak dipecah
 var1439,2017,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1439,2017,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2017,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2017,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1439,2018,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2018; angka tidak dipecah
 var1439,2018,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1439,2018,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2018,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2018,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1439,2019,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2019; angka tidak dipecah
 var1439,2019,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1439,2019,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2019,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2019,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1439,2020,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2020; angka tidak dipecah
 var1439,2020,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1439,2020,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2020,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2020,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1439,2021,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2021; angka tidak dipecah
 var1439,2021,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1439,2021,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2021,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1439,2021,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1439,2022,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
-var1439,2022,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1439,2022,9500,Papua Pegunungan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1439,2022,9600,Papua Barat Daya,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1439,2023,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
-var1439,2023,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1439,2023,9500,Papua Pegunungan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1439,2023,9600,Papua Barat Daya,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1439,2024,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1439,2025,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1451,2015,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2015; angka tidak dipecah
+var1439,2022,9300,Papua Selatan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1439,2022,9400,Papua Tengah,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1439,2022,9500,Papua Pegunungan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1439,2022,9600,Papua Barat Daya,provinsi,batas_lama,Papua Barat masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1439,2023,9300,Papua Selatan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1439,2023,9400,Papua Tengah,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1439,2023,9500,Papua Pegunungan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1439,2023,9600,Papua Barat Daya,provinsi,batas_lama,Papua Barat masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
 var1451,2015,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1451,2015,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2015,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2015,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1451,2016,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2016; angka tidak dipecah
 var1451,2016,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1451,2016,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2016,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2016,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1451,2017,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2017; angka tidak dipecah
 var1451,2017,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1451,2017,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2017,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2017,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1451,2018,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2018; angka tidak dipecah
 var1451,2018,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1451,2018,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2018,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2018,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1451,2019,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2019; angka tidak dipecah
 var1451,2019,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1451,2019,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2019,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2019,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1451,2020,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2020; angka tidak dipecah
 var1451,2020,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1451,2020,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2020,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2020,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1451,2021,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2021; angka tidak dipecah
 var1451,2021,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1451,2021,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2021,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1451,2021,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1451,2022,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
-var1451,2022,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1451,2022,9500,Papua Pegunungan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1451,2022,9600,Papua Barat Daya,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1451,2023,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
-var1451,2023,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1451,2023,9500,Papua Pegunungan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1451,2023,9600,Papua Barat Daya,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1451,2024,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1451,2025,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1447,2015,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2015; angka tidak dipecah
+var1451,2022,9300,Papua Selatan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1451,2022,9400,Papua Tengah,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1451,2022,9500,Papua Pegunungan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1451,2022,9600,Papua Barat Daya,provinsi,batas_lama,Papua Barat masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1451,2023,9300,Papua Selatan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1451,2023,9400,Papua Tengah,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1451,2023,9500,Papua Pegunungan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1451,2023,9600,Papua Barat Daya,provinsi,batas_lama,Papua Barat masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
 var1447,2015,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1447,2015,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2015,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2015,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1447,2016,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2016; angka tidak dipecah
 var1447,2016,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1447,2016,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2016,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2016,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1447,2017,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2017; angka tidak dipecah
 var1447,2017,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1447,2017,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2017,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2017,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1447,2018,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2018; angka tidak dipecah
 var1447,2018,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1447,2018,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2018,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2018,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1447,2019,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2019; angka tidak dipecah
 var1447,2019,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1447,2019,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2019,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2019,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1447,2020,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2020; angka tidak dipecah
 var1447,2020,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1447,2020,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2020,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2020,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1447,2021,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2021; angka tidak dipecah
 var1447,2021,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1447,2021,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2021,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1447,2021,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1447,2022,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
-var1447,2022,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1447,2022,9500,Papua Pegunungan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1447,2022,9600,Papua Barat Daya,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1447,2023,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
-var1447,2023,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1447,2023,9500,Papua Pegunungan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1447,2023,9600,Papua Barat Daya,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1447,2024,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1447,2025,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1221,2015,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2015; angka tidak dipecah
+var1447,2022,9300,Papua Selatan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1447,2022,9400,Papua Tengah,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1447,2022,9500,Papua Pegunungan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1447,2022,9600,Papua Barat Daya,provinsi,batas_lama,Papua Barat masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1447,2023,9300,Papua Selatan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1447,2023,9400,Papua Tengah,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1447,2023,9500,Papua Pegunungan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1447,2023,9600,Papua Barat Daya,provinsi,batas_lama,Papua Barat masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
 var1221,2015,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1221,2015,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2015,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2015,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1221,2016,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2016; angka tidak dipecah
 var1221,2016,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1221,2016,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2016,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2016,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1221,2017,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2017; angka tidak dipecah
 var1221,2017,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1221,2017,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2017,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2017,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1221,2018,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2018; angka tidak dipecah
 var1221,2018,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1221,2018,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2018,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2018,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1221,2019,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2019; angka tidak dipecah
 var1221,2019,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1221,2019,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2019,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2019,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1221,2020,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2020; angka tidak dipecah
 var1221,2020,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1221,2020,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2020,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2020,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1221,2021,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2021; angka tidak dipecah
 var1221,2021,9300,Papua Selatan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
+var1221,2021,9400,Papua Tengah,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2021,9500,Papua Pegunungan,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
 var1221,2021,9600,Papua Barat Daya,provinsi,belum_ada,provinsi dibentuk; data penuh mulai 2022
-var1221,2022,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
-var1221,2022,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1221,2022,9500,Papua Pegunungan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1221,2022,9600,Papua Barat Daya,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1221,2023,9200,Papua Barat,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
-var1221,2023,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1221,2023,9500,Papua Pegunungan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1221,2023,9600,Papua Barat Daya,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1221,2024,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
-var1221,2025,9300,Papua Selatan,provinsi,missing,provinsi sudah ada dan penerbit tidak menyatakan angka itu tidak ada
+var1221,2022,9300,Papua Selatan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1221,2022,9400,Papua Tengah,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1221,2022,9500,Papua Pegunungan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1221,2022,9600,Papua Barat Daya,provinsi,batas_lama,Papua Barat masih diterbitkan dengan batas lama pada 2022; angka tidak dipecah
+var1221,2023,9300,Papua Selatan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1221,2023,9400,Papua Tengah,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1221,2023,9500,Papua Pegunungan,provinsi,batas_lama,Papua masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
+var1221,2023,9600,Papua Barat Daya,provinsi,batas_lama,Papua Barat masih diterbitkan dengan batas lama pada 2023; angka tidak dipecah
