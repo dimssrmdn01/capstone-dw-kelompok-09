@@ -1,6 +1,7 @@
 {
   "metrik": {
     "seri_panel": 4,
+    "baris_gold": 1672,
     "seri_silver": 6,
     "rincian_dienkode": 1,
     "baris_koreksi_satuan": 391,

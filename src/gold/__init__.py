@@ -24,11 +24,13 @@ def jalankan(silver):
     # 2. Bentuk grid kelengkapan wilayah dan periode.
     grid_lengkap = grid.bentuk_grid(silver, {})
 
-    # 3. Gabungkan observasi terpilih ke grid provinsi.
+    # 3. Gabungkan observasi terpilih ke grid provinsi beserta jejak asal Silver.
+    kolom_jejak = [k for k in ["rincian", "_berkas_raw", "_sha256_raw"] if k in observasi.columns]
     kolom_nilai = [
         "seri_kode", "wilayah_kode", "periode", "nilai",
         "satuan", "sumber", "anomaly_flag",
         "kategori_anomali", "tindakan_anomali", "bukti_anomali",
+        *kolom_jejak,
     ]
     nilai = observasi[
         observasi["wilayah_kode"].isin(
@@ -48,6 +50,11 @@ def jalankan(silver):
         how="left",
         validate="one_to_one",
     )
+
+    # Pastikan satuan seragam per indikator sebelum panel dibentuk.
+    satuan_ganda = panel.dropna(subset=["satuan"]).groupby("seri_kode")["satuan"].nunique()
+    if (satuan_ganda > 1).any():
+        raise ValueError(f"Satuan tidak seragam pada indikator: {satuan_ganda[satuan_ganda > 1].to_dict()}")
 
     panel["anomaly_flag"] = panel["anomaly_flag"].fillna(False).astype(bool)
     for kolom in ["kategori_anomali", "tindakan_anomali", "bukti_anomali"]:
