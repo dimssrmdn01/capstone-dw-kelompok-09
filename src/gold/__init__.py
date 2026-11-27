@@ -1,12 +1,11 @@
-﻿"""Tahap 4-6: seleksi, pembentukan panel, integrasi nasional, dan penyimpanan Gold."""
+"""Tahap 4-6: seleksi, pembentukan panel, integrasi nasional, dan penyimpanan Gold."""
 
-import sqlite3
 import pandas as pd
 
 from src import konfigurasi as K
 from src.laporan import ROOT
 from src.silver import grid
-from src.gold import seleksi
+from src.gold import penyimpanan, seleksi
 from src.gold.integrasi_nasional import (
     buat_tabel_nasional_dari_silver,
     buat_tabel_rekonsiliasi,
@@ -91,11 +90,9 @@ def jalankan(silver):
     for nama, df in tabel.items():
         df.to_parquet(folder / f"{nama}.parquet", index=False)
 
-    # 7. Simpan seluruh tabel Gold ke SQLite.
-    db_path = folder / "gold.sqlite"
-    with sqlite3.connect(db_path) as conn:
-        for nama, df in tabel.items():
-            df.to_sql(nama, conn, if_exists="replace", index=False)
+    # 7. Simpan Silver dan seluruh tabel Gold ke SQLite berkunci primer (DDL: src/gold/skema.sql).
+    #    Jumlah baris SQL dicocokkan dengan Parquet; pipeline berhenti bila berbeda.
+    penyimpanan.simpan({"silver": silver, **tabel})
 
     print(f"Gold: {len(observasi):,} observasi terpilih")
     print(f"Gold: {len(panel):,} sel panel provinsi")

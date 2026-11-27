@@ -1,4 +1,3 @@
-﻿
 """Tahap 6: integrasi dan rekonsiliasi pembanding nasional."""
 
 import pandas as pd
@@ -75,7 +74,31 @@ def buat_tabel_nasional_dari_silver(df_silver):
     ).reset_index(drop=True)
 
 
+KOLOM_REKONSILIASI = [
+    "pasangan", "periode",
+    "seri_utama", "nilai_utama",
+    "seri_pembanding", "rincian_pembanding", "nilai_pembanding",
+    "selisih", "status_pasangan", "kategori_selisih",
+    "penjelasan", "dugaan", "bukti", "alasan_perbandingan",
+]
+
+
+def _penjelasan_tanpa_pasangan(seri_ada, seri_kosong, periode):
+    return (
+        f"Hanya {seri_ada} yang memiliki nilai pada {periode}; {seri_kosong} tidak tersedia "
+        f"pada periode ini di snapshot yang dipakai. Baris dipertahankan agar celah periode terlihat."
+    )
+
+
 def buat_tabel_rekonsiliasi(tabel_nasional):
+    """
+    Tahap 6: pasangkan seri utama dengan pembanding nasional per periode.
+
+    Satu baris = satu pasangan x periode. Semua periode yang punya nilai di salah satu
+    seri ikut tampil (status_pasangan menandai berpasangan / hanya_utama / hanya_pembanding).
+    Selisih = nilai_utama - nilai_pembanding dan tidak pernah dihapus atau dipaksa sama.
+    Setiap baris berpasangan diberi satu kategori dari K.KATEGORI_SELISIH.
+    """
     hasil = []
 
     lebar = tabel_nasional.pivot(
@@ -86,40 +109,83 @@ def buat_tabel_rekonsiliasi(tabel_nasional):
 
     for pasangan in K.PASANGAN:
         utama = pasangan["utama"]
+        aturan = pasangan.get("rekonsiliasi", {})
+        pengecualian = aturan.get("pengecualian", {})
 
         if utama not in lebar.columns:
-            continue
+            raise ValueError(f"Seri utama {utama} ({pasangan['id']}) tidak ada di tabel nasional.")
 
         for pembanding, rincian in pasangan["pembanding"]:
             if pembanding not in lebar.columns:
-                continue
+                raise ValueError(
+                    f"Seri pembanding {pembanding} ({pasangan['id']}) tidak ada di tabel nasional."
+                )
 
-            sub = lebar[
-                [utama, pembanding]
-            ].dropna()
+            sub = lebar[[utama, pembanding]].dropna(how="all")
 
             for periode, baris in sub.iterrows():
-                nilai_utama = float(baris[utama])
-                nilai_pembanding = float(baris[pembanding])
+                periode = str(periode)
+                ada_utama = pd.notna(baris[utama])
+                ada_pembanding = pd.notna(baris[pembanding])
+                nilai_utama = float(baris[utama]) if ada_utama else None
+                nilai_pembanding = float(baris[pembanding]) if ada_pembanding else None
+
+                if ada_utama and ada_pembanding:
+                    status = "berpasangan"
+                    khusus = pengecualian.get(periode, {})
+                    kategori = khusus.get("kategori", aturan.get("kategori"))
+                    penjelasan = khusus.get("penjelasan", aturan.get("penjelasan", ""))
+                    dugaan = khusus.get("dugaan", "")
+                    bukti = khusus.get("bukti", aturan.get("bukti", ""))
+                    selisih = round(nilai_utama - nilai_pembanding, 4)
+                elif ada_utama:
+                    status, kategori, selisih = "hanya_utama", None, None
+                    penjelasan = _penjelasan_tanpa_pasangan(utama, pembanding, periode)
+                    dugaan, bukti = "", ""
+                else:
+                    status, kategori, selisih = "hanya_pembanding", None, None
+                    penjelasan = _penjelasan_tanpa_pasangan(pembanding, utama, periode)
+                    dugaan, bukti = "", ""
 
                 hasil.append({
                     "pasangan": pasangan["id"],
-                    "periode": str(periode),
+                    "periode": periode,
                     "seri_utama": utama,
-                    "nilai_seri_utama": nilai_utama,
+                    "nilai_utama": nilai_utama,
                     "seri_pembanding": pembanding,
                     "rincian_pembanding": rincian,
                     "nilai_pembanding": nilai_pembanding,
-                    "selisih": round(
-                        nilai_utama - nilai_pembanding,
-                        4,
-                    ),
-                    "alasan_perbandingan": (
-                        pasangan["alasan_rincian"]
-                    ),
+                    "selisih": selisih,
+                    "status_pasangan": status,
+                    "kategori_selisih": kategori,
+                    "penjelasan": penjelasan,
+                    "dugaan": dugaan,
+                    "bukti": bukti,
+                    "alasan_perbandingan": pasangan["alasan_rincian"],
                 })
 
-    return pd.DataFrame(hasil)
+    tabel = pd.DataFrame(hasil, columns=KOLOM_REKONSILIASI)
+    for kolom in ["nilai_utama", "nilai_pembanding", "selisih"]:
+        tabel[kolom] = tabel[kolom].astype("float64")
+
+    berpasangan = tabel["status_pasangan"] == "berpasangan"
+    tanpa_kategori = berpasangan & tabel["kategori_selisih"].isna()
+    if tanpa_kategori.any():
+        raise ValueError(
+            "Baris berpasangan tanpa kategori selisih:\n"
+            + tabel.loc[tanpa_kategori, ["pasangan", "periode"]].to_string(index=False)
+        )
+    tidak_dikenal = berpasangan & ~tabel["kategori_selisih"].isin(K.KATEGORI_SELISIH)
+    if tidak_dikenal.any():
+        raise ValueError(
+            "Kategori selisih tidak dikenal: "
+            + str(sorted(tabel.loc[tidak_dikenal, "kategori_selisih"].unique()))
+        )
+    belum = berpasangan & tabel["kategori_selisih"].eq("belum terjelaskan")
+    if (tabel.loc[belum, "dugaan"].str.strip().eq("") | tabel.loc[belum, "bukti"].str.strip().eq("")).any():
+        raise ValueError("Baris 'belum terjelaskan' wajib memuat dugaan dan bukti yang sudah dicari.")
+
+    return tabel.sort_values(["pasangan", "periode"]).reset_index(drop=True)
 
 
 if __name__ == "__main__":

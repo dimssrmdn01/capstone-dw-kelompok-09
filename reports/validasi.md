@@ -6,4 +6,4 @@
 
 - Jumlah baris Silver: 1,653
 - Jumlah sel panel Gold: 1,672
-- Jumlah baris rekonsiliasi: 14
+- Jumlah baris rekonsiliasi: 89
