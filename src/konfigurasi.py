@@ -123,6 +123,43 @@ PASANGAN = [
             "karena sama-sama mengukur Angka Partisipasi Kasar jenjang prasekolah dalam satuan persen "
             "(irisan tahun 2015-2018), dengan catatan beda cakupan usia (BPS 3-6 tahun vs UIS usia resmi)."
         ),
+        "rekonsiliasi": {
+            "kategori": "definisi berbeda",
+            "penjelasan": (
+                "Kelompok umur acuan berbeda. APK PAUD BPS dihitung terhadap penduduk umur 3-6 tahun dari survei "
+                "rumah tangga (Susenas). SE.PRE.ENRR (UIS) membagi seluruh peserta pendidikan prasekolah, berapa pun "
+                "umurnya, dengan penduduk pada kelompok umur resmi jenjang prasekolah. Kelompok umur resmi itu lebih "
+                "sempit daripada 3-6 tahun, sehingga penyebut UIS lebih kecil dan rasionya lebih tinggi; ini konsisten "
+                "dengan WDI selalu di atas BPS. Sumber data juga berbeda (survei vs administratif), dicatat sebagai "
+                "perbedaan metode sekunder."
+            ),
+            "bukti": (
+                "var.note sdg4_apk_paud.json: 'APK PAUD 3-6 Tahun', sumber BPS Susenas; sourceNote SE.PRE.ENRR di "
+                "wdi/2026-10-20/metadata/sumber2_indikator.json: 'ratio of total enrollment, regardless of age, to the "
+                "population of the age group that officially corresponds to the level', sumber UNESCO UIS. Rentang umur "
+                "resmi prasekolah Indonesia tidak tercantum di berkas mentah."
+            ),
+            "pengecualian": {
+                "2015": {
+                    "kategori": "belum terjelaskan",
+                    "penjelasan": (
+                        "Beda definisi umur menjelaskan WDI lebih tinggi, tetapi tidak menjelaskan mengapa selisih 2015 "
+                        "(-12,17) jauh lebih kecil daripada 2016-2018 (-24 s.d. -29)."
+                    ),
+                    "dugaan": (
+                        "Nilai WDI 2015 (47,35) turun 10,53 poin dari 2014 (57,88) lalu naik 14,53 poin ke 2016 (61,88), "
+                        "sedangkan BPS stabil (35,18 ke 34,62). Pola turun-naik satu tahun hanya di WDI mengarah ke "
+                        "perubahan cakupan data administratif UIS atau revisi penyebut penduduk pada tahun itu, bukan "
+                        "perubahan partisipasi yang sesungguhnya."
+                    ),
+                    "bukti": (
+                        "Sudah diperiksa: obs_status SE.PRE.ENRR 2014-2016 di wdi/2026-10-20/data/kelompok-02-hal-01.json "
+                        "kosong (tidak ditandai estimasi); sourceNote di metadata WDI tidak menyebut patahan seri. Belum "
+                        "diperiksa: arsip WDI 142 rilis (tahap 7) untuk melihat apakah nilai 2015 direvisi antar-rilis."
+                    ),
+                },
+            },
+        },
     },
     {
         "id": "P-02",
@@ -134,7 +171,36 @@ PASANGAN = [
             "(kepemilikan telepon genggam) serta var1447/var1451 (keterampilan TIK) karena tidak tersedia "
             "seri kepemilikan ponsel identik di WDI dan keduanya merepresentasikan penetrasi digital nasional (irisan 2015-2024)."
         ),
+        "rekonsiliasi": {
+            "kategori": "definisi berbeda",
+            "penjelasan": (
+                "Pasangan kontekstual, bukan indikator identik. var1221 mengukur proporsi individu umur 5 tahun "
+                "ke atas yang menguasai/memiliki telepon genggam (Susenas Kor), sedangkan IT.NET.USER.ZS mengukur "
+                "individu yang memakai internet dari lokasi dan perangkat apa pun dalam 3 bulan terakhir (ITU) "
+                "terhadap seluruh penduduk. Selisih positif pada awal periode berarti banyak pemilik ponsel belum "
+                "memakai internet; selisih menyempit lalu berbalik negatif sejak 2023 karena penggunaan internet "
+                "tumbuh lebih cepat dan dapat terjadi tanpa memiliki ponsel sendiri. Beda penyebut (umur 5+ vs "
+                "seluruh penduduk) adalah perbedaan cakupan sekunder."
+            ),
+            "bukti": (
+                "var.note sdg5_5_b_1_v1221.json: 'Proporsi individu umur 5 tahun ke atas', sumber Susenas Kor; "
+                "sourceNote IT.NET.USER.ZS di wdi/2026-10-20/metadata/sumber2_indikator.json: 'individuals who "
+                "have used the Internet (from any location) in the last 3 months', sumber ITU."
+            ),
+            "pengecualian": {},
+        },
     },
 ]
+
+# Kategori penjelasan selisih yang boleh dipakai di tabel rekonsiliasi (tugas #23).
+KATEGORI_SELISIH = [
+    "definisi berbeda",
+    "metode berbeda",
+    "vintage berbeda",
+    "cakupan berbeda",
+    "belum terjelaskan",
+]
+
+
 
 URUTAN_BERKAS = []

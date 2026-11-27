@@ -214,32 +214,49 @@ def catat_keputusan(catatan, lokasi=None):
     nim_lama = log.loc[log["nim"].str.strip() != "", "nim"]
     nim = nim_lama.iloc[0] if not nim_lama.empty else ""
 
-    # Hapus catatan Gold lama agar hasil pencatatan ulang tetap idempotent.
+    # Catatan Gold lama diganti agar pencatatan ulang idempotent. Id dan tanggal catatan
+    # yang isinya tidak berubah dipertahankan, supaya rujukan K-0xx di laporan tidak bergeser
+    # dan menjalankan ulang pipeline tidak mengubah log yang sudah di-commit.
+    gold_lama = log[log["tahap"].str.lower() == "gold"]
+    lama = {
+        (b["seri_kode"], b["keputusan"], b["dampak_baris"]): (b["id"], b["tanggal"])
+        for _, b in gold_lama.iterrows()
+    }
+    id_gold_lama = [i for i, _ in lama.values()]
     log = log[log["tahap"].str.lower() != "gold"].copy()
 
     nomor_terakhir = 0
-    for identitas in log["id"].astype(str):
+    for identitas in [*log["id"].astype(str), *id_gold_lama]:
         cocok = re.fullmatch(r"K-(\d+)", identitas.strip())
         if cocok:
             nomor_terakhir = max(nomor_terakhir, int(cocok.group(1)))
 
     baris_baru = []
-    for i, baris in catatan.reset_index(drop=True).iterrows():
+    for _, baris in catatan.reset_index(drop=True).iterrows():
+        dampak = str(int(baris["dampak_baris"]))
+        tetap = lama.get((baris["seri_kode"], baris["keputusan"], dampak))
+        if tetap:
+            identitas, tanggal = tetap
+        else:
+            nomor_terakhir += 1
+            identitas, tanggal = f"K-{nomor_terakhir:03d}", date.today().isoformat()
         baris_baru.append({
-            "id": f"K-{nomor_terakhir + i + 1:03d}",
-            "tanggal": date.today().isoformat(),
+            "id": identitas,
+            "tanggal": tanggal,
             "nim": nim,
             "tahap": "gold",
             "seri_kode": baris["seri_kode"],
             "keputusan": baris["keputusan"],
             "alternatif_ditolak": baris["alternatif_ditolak"],
             "alasan": baris["alasan"],
-            "dampak_baris": str(int(baris["dampak_baris"])),
+            "dampak_baris": dampak,
         })
 
     hasil_log = pd.concat(
         [log, pd.DataFrame(baris_baru, columns=KOLOM_LOG)],
         ignore_index=True,
     )
+    nomor = hasil_log["id"].str.extract(r"K-(\d+)", expand=False).astype(float)
+    hasil_log = hasil_log.iloc[nomor.argsort(kind="stable")].reset_index(drop=True)
     hasil_log.to_csv(lokasi, index=False, encoding="utf-8-sig")
     return hasil_log

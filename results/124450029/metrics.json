@@ -2,9 +2,12 @@
   "metrik": {
     "berkas_terverifikasi": 17,
     "baris_wdi_idn": 81,
-    "pasangan_rekonsiliasi": 14
+    "pasangan_rekonsiliasi": 14,
+    "selisih_median": 19.1724,
+    "baris_silver_sql": 1653,
+    "tabel_sql_cocok": 7
   },
   "seed": 0,
   "data_hash": "322ae8bff3296c1c0cf2a61e4319b08e6d9dcf8283d3da8c38d0d0b2781bbdef",
-  "perangkat": "Windows AMD64 Python 3.13.7"
+  "perangkat": "Windows AMD64 Python 3.13.9"
 }
