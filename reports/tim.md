@@ -211,3 +211,81 @@ Artefak Gold yang dihasilkan meliputi `observasi_terpilih.parquet`, `panel_provi
 | Shafa Delaila Azzahra | 124450124 | Validasi dan dokumentasi | Reproduksi & Demo: menguji `python pipeline.py` dari klon bersih dan menyiapkan rekaman Demo Sprint 1, 2, dan 3. | Validasi dan reproduksibilitas; dokumentasi |
 
 **Alasan pembagian:** Kelompok beranggotakan lima orang, sehingga setiap anggota memegang tepat satu komponen dan kelima komponen terisi. Pembagian mengikuti urutan tahap pipeline agar hasil satu komponen menjadi masukan bagi komponen berikutnya. Tugas sampingan dipasangkan dengan komponen yang paling dekat agar beban kerja tetap wajar dan tidak ada anggota yang memegang dua komponen yang tidak berhubungan.
+
+
+
+## Integrasi dan Rekonsiliasi Nasional
+
+### 1. Tujuan Integrasi
+
+Integrasi dan rekonsiliasi nasional dilakukan untuk membandingkan indikator dari Badan Pusat Statistik (BPS) dengan indikator pembanding dari World Development Indicators (WDI). Proses ini bertujuan mengetahui perbedaan nilai antarindikator, menghitung selisih, serta menjelaskan perbedaan berdasarkan definisi dan cakupan pengukuran masing-masing indikator.
+
+### 2. Pasangan Indikator yang Dibandingkan
+
+#### P-01 – APK PAUD
+
+- Seri utama BPS: `var1439`
+- Seri pembanding WDI: `SE.PRE.ENRR`
+- Periode: 2015–2018
+
+| Tahun | Nilai BPS | Nilai WDI | Selisih |
+|---|---:|---:|---:|
+| 2015 | 35,18 | 47,348408 | -12,1684 |
+| 2016 | 34,62 | 61,876438 | -27,2564 |
+| 2017 | 33,84 | 63,193069 | -29,3531 |
+| 2018 | 37,92 | 62,343658 | -24,4237 |
+
+**Analisis:**
+
+Nilai APK PAUD dari BPS lebih rendah dibandingkan indikator WDI pada seluruh periode pengamatan. Perbedaan ini berkaitan dengan cakupan pengukuran. Data BPS menggunakan kelompok usia 3–6 tahun, sedangkan indikator WDI mengacu pada cakupan pendidikan prasekolah berdasarkan definisi indikator internasional. Oleh karena itu, kedua indikator memiliki keterkaitan konsep, tetapi tidak sepenuhnya identik.
+
+#### P-02 – Perbandingan Kepemilikan Telepon Genggam dan Penggunaan Internet
+
+- Seri utama BPS: `var1221`
+- Seri pembanding WDI: `IT.NET.USER.ZS`
+- Periode: 2015–2024
+
+| Tahun | Nilai BPS | Nilai WDI | Selisih |
+|---|---:|---:|---:|
+| 2015 | 56,92 | 22,062743 | 34,8573 |
+| 2016 | 58,30 | 25,447354 | 32,8526 |
+| 2017 | 59,59 | 32,335806 | 27,2542 |
+| 2018 | 62,41 | 39,904639 | 22,5054 |
+| 2019 | 63,53 | 47,690649 | 15,8394 |
+| 2020 | 62,84 | 53,726494 | 9,1135 |
+| 2021 | 65,87 | 62,104478 | 3,7655 |
+| 2022 | 67,88 | 66,484613 | 1,3954 |
+| 2023 | 67,29 | 69,208366 | -1,9184 |
+| 2024 | 68,65 | 72,780755 | -4,1308 |
+
+**Analisis:**
+
+Pada periode 2015–2022, nilai indikator BPS lebih tinggi daripada indikator WDI. Namun, pada 2023 dan 2024, nilai WDI lebih tinggi. Perbedaan ini perlu dipahami berdasarkan definisi indikator. BPS mengukur kepemilikan telepon genggam, sedangkan WDI mengukur proporsi individu yang menggunakan internet. Dengan demikian, kedua indikator tidak mengukur hal yang sama dan digunakan sebagai indikator pembanding kontekstual.
+
+### 3. Metode Perhitungan Selisih
+
+Selisih dihitung menggunakan rumus:
+
+`Selisih = Nilai BPS - Nilai WDI`
+
+Interpretasi hasil:
+- Selisih positif menunjukkan nilai indikator BPS lebih tinggi daripada WDI.
+- Selisih negatif menunjukkan nilai indikator BPS lebih rendah daripada WDI.
+- Selisih nol menunjukkan kedua nilai sama.
+
+Karena kedua indikator dinyatakan dalam persentase, hasil pengurangan dibaca sebagai perbedaan dalam poin persentase.
+
+### 4. Ringkasan Hasil Rekonsiliasi
+
+Berdasarkan hasil perbandingan yang tersedia, terdapat dua pasangan indikator dengan total 14 observasi, terdiri atas 4 observasi pada P-01 dan 10 observasi pada P-02.
+
+Kedua pasangan menunjukkan adanya perbedaan nilai antara data BPS dan WDI. Perbedaan tersebut tidak selalu menunjukkan kesalahan data karena masing-masing indikator memiliki definisi, cakupan, dan metode pengukuran yang berbeda.
+
+### 5. Sumber Data dan Reproduksibilitas
+
+Sumber yang digunakan untuk mendukung proses integrasi dan rekonsiliasi meliputi:
+
+- `data/gold/rekonsiliasi_nasional.parquet`
+- `data/gold/nasional.parquet`
+- `log-keputusan.csv`
+- `src/gold/integrasi_nasional.py`
