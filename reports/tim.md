@@ -148,3 +148,89 @@ Artefak Gold yang dihasilkan meliputi `observasi_terpilih.parquet`, `panel_provi
 | Shafa Delaila Azzahra | 124450124 | Validasi dan dokumentasi | Reproduksi & Demo: menguji `python pipeline.py` dari klon bersih dan menyiapkan rekaman Demo Sprint 1, 2, dan 3. | Validasi dan reproduksibilitas; dokumentasi |
 
 **Alasan pembagian:** Kelompok beranggotakan lima orang, sehingga setiap anggota memegang tepat satu komponen dan kelima komponen terisi. Pembagian mengikuti urutan tahap pipeline agar hasil satu komponen menjadi masukan bagi komponen berikutnya. Tugas sampingan dipasangkan dengan komponen yang paling dekat agar beban kerja tetap wajar dan tidak ada anggota yang memegang dua komponen yang tidak berhubungan.
+
+
+
+## Integrasi dan Rekonsiliasi Nasional
+
+### 1. Tujuan Integrasi
+
+Integrasi dan rekonsiliasi nasional dilakukan untuk membandingkan indikator dari BPS dengan indikator pembanding dari World Development Indicators (WDI). Perbandingan menggunakan data agregat nasional dengan `wilayah_kode = 9999` dan `rincian = total`.
+
+Tujuan proses ini adalah mengetahui perbedaan nilai antarindikator, menghitung selisih, serta menjelaskan perbedaan berdasarkan definisi dan cakupan pengukuran masing-masing indikator.
+
+### 2. Pasangan Indikator yang Dibandingkan
+
+#### P-01 — APK PAUD
+
+- Seri utama BPS: `var1439`
+- Seri pembanding WDI: `SE.PRE.ENRR`
+- Periode: 2015–2018
+
+| Tahun | Nilai BPS | Nilai WDI | Selisih |
+|---|---:|---:|---:|
+| 2015 | 35,18 | 47,348408 | -12,1684 |
+| 2016 | 34,62 | 61,876438 | -27,2564 |
+| 2017 | 33,84 | 63,193069 | -29,3531 |
+| 2018 | 37,92 | 62,343658 | -24,4237 |
+
+**Analisis:**
+
+Nilai APK PAUD dari BPS lebih rendah dibandingkan indikator WDI pada seluruh periode pengamatan. Selisih terbesar terjadi pada tahun 2017 sebesar -29,3531 poin persentase.
+
+Perbedaan ini berkaitan dengan cakupan pengukuran. Data BPS menggunakan kelompok usia 3–6 tahun, sedangkan indikator UIS menggunakan usia resmi jenjang prasekolah. Oleh karena itu, kedua indikator memiliki keterkaitan konsep, tetapi tidak sepenuhnya identik.
+
+#### P-02 — Perbandingan Kepemilikan Telepon Genggam dan Penggunaan Internet
+
+- Seri utama BPS: `var1221`
+- Seri pembanding WDI: `IT.NET.USER.ZS`
+- Periode: 2015–2024
+
+| Tahun | Nilai BPS | Nilai WDI | Selisih |
+|---|---:|---:|---:|
+| 2015 | 56,92 | 22,062743 | 34,8573 |
+| 2016 | 58,30 | 25,447354 | 32,8526 |
+| 2017 | 59,59 | 32,335806 | 27,2542 |
+| 2018 | 62,41 | 39,904639 | 22,5054 |
+| 2019 | 63,53 | 47,690649 | 15,8394 |
+| 2020 | 62,84 | 53,726494 | 9,1135 |
+| 2021 | 65,87 | 62,104478 | 3,7655 |
+| 2022 | 67,88 | 66,484613 | 1,3954 |
+| 2023 | 67,29 | 69,208366 | -1,9184 |
+| 2024 | 68,65 | 72,780755 | -4,1308 |
+
+**Analisis:**
+
+Pada tahun 2015, nilai indikator BPS lebih tinggi 34,8573 poin persentase daripada indikator WDI. Selisih tersebut semakin kecil hingga tahun 2022, kemudian menjadi negatif pada tahun 2023 dan 2024.
+
+Perbedaan terjadi karena kedua indikator mengukur aspek yang berbeda. BPS mengukur kepemilikan telepon genggam, sedangkan WDI mengukur penggunaan internet. Seseorang dapat menggunakan internet tanpa memiliki telepon genggam pribadi.
+
+Dengan demikian, `IT.NET.USER.ZS` digunakan sebagai pembanding kontekstual untuk melihat perkembangan penetrasi digital nasional, bukan sebagai indikator yang identik dengan kepemilikan telepon genggam.
+
+### 3. Metode Perhitungan
+
+Selisih dihitung menggunakan rumus:
+
+`Selisih = nilai_seri_utama - nilai_pembanding`
+
+Interpretasi:
+- Selisih positif menunjukkan nilai seri utama lebih tinggi.
+- Selisih negatif menunjukkan nilai seri utama lebih rendah.
+- Selisih mendekati nol menunjukkan kedua nilai semakin berdekatan.
+
+Karena kedua indikator dinyatakan dalam persen, hasil pengurangan diinterpretasikan sebagai poin persentase.
+
+### 4. Ringkasan Hasil Rekonsiliasi
+
+Hasil rekonsiliasi menghasilkan 14 baris data, terdiri dari:
+- P-01: 4 baris perbandingan APK PAUD.
+- P-02: 10 baris perbandingan kepemilikan telepon genggam.
+
+Perbedaan nilai tidak secara otomatis menunjukkan kesalahan data. Perbedaan dapat disebabkan oleh definisi indikator, cakupan populasi, dan aspek yang diukur oleh masing-masing sumber.
+
+### 5. Sumber Data dan Kode
+
+- Hasil rekonsiliasi: `data/gold/rekonsiliasi_nasional.parquet`
+- Tabel nasional: `data/gold/nasional.parquet`
+- Log keputusan pasangan indikator: `log-keputusan.csv`
+- Implementasi integrasi: `src/gold/integrasi_nasional.py`
