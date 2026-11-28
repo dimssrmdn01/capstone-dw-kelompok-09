@@ -7,3 +7,5 @@ data/LISENSI.md
 __pycache__/
 .ipynb_checkpoints/
 .venv/
+# basis data SQLite dibangun ulang oleh pipeline.py (src/gold/skema.sql); tidak di-commit
+*.sqlite

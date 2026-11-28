@@ -2,7 +2,7 @@
 
 Dokumen ini menjelaskan struktur keluaran Silver pada `data/silver/silver.parquet`.
 Informasi tipe data mengacu pada hasil pemeriksaan aktual terhadap berkas Silver.
-Kolom Gold belum didokumentasikan karena akan ditambahkan pada Sprint 2–3.
+Bagian Gold di akhir dokumen memuat tabel rekonsiliasi dan rujukan DDL SQL.
 
 ## `data/silver/silver.parquet`
 
@@ -84,4 +84,25 @@ Cara menelusurinya:
 
 ## data/gold/
 
-Kolom Gold akan ditambahkan pada Sprint 2–3 setelah tabel Gold dibentuk. Karena itu, bagian ini belum diisi.
+Semua tabel Gold ditulis sebagai Parquet di `data/gold/` dan dimuat ke `data/gold/gold.sqlite` (tidak di-commit) dengan DDL berkunci primer di `src/gold/skema.sql`. Tipe kolom SQL, kunci primer, dan aturan `CHECK` setiap tabel (`silver`, `observasi_terpilih`, `grid_kelengkapan`, `panel_provinsi`, `panel_provinsi_lebar`, `nasional`, `rekonsiliasi_nasional`, `mentah_dokumen`) dapat dibaca langsung di berkas DDL tersebut. Jumlah baris SQL dibandingkan dengan Parquet di `reports/penyimpanan-sql.md`. Kolom tabel Gold lainnya akan dilengkapi oleh pemilik komponennya.
+
+### `data/gold/rekonsiliasi_nasional.parquet`
+
+Satu baris mewakili satu pasangan × periode. Kunci primer: `pasangan, periode`. Dibuat oleh `src/gold/integrasi_nasional.py::buat_tabel_rekonsiliasi` dari `nasional.parquet`; teks penjelasan berasal dari `src/konfigurasi.py` (`PASANGAN[*]["rekonsiliasi"]`).
+
+| Kolom | Tipe (Parquet / SQL) | Boleh kosong | Nilai sah | Keterangan |
+|---|---|---|---|---|
+| `pasangan` | teks / TEXT | Tidak | `P-01`, `P-02` | Id pasangan di `K.PASANGAN`. |
+| `periode` | teks / TEXT | Tidak | Tahun, contoh `2015` | Periode dari tabel nasional. |
+| `seri_utama` | teks / TEXT | Tidak | `var1439`, `var1221` | Seri BPS agregat Indonesia (`wilayah_kode = 9999`, rincian `total`). |
+| `nilai_utama` | `float64` / REAL | Ya, bila `status_pasangan = hanya_pembanding` | Persen | Nilai seri utama. |
+| `seri_pembanding` | teks / TEXT | Tidak | `SE.PRE.ENRR`, `IT.NET.USER.ZS` | Seri WDI tingkat negara. |
+| `rincian_pembanding` | teks / TEXT | Tidak | `total` | Rincian pembanding yang dipakai. |
+| `nilai_pembanding` | `float64` / REAL | Ya, bila `status_pasangan = hanya_utama` | Persen / per 100 orang | Nilai pembanding. |
+| `selisih` | `float64` / REAL | Ya, hanya pada baris tanpa pasangan | Bilangan real, 4 desimal | `nilai_utama − nilai_pembanding`; tidak dihapus dan tidak dipaksa sama. |
+| `status_pasangan` | teks / TEXT | Tidak | `berpasangan`, `hanya_utama`, `hanya_pembanding` | Menandai periode tanpa pasangan; baris ini tetap ditampilkan. |
+| `kategori_selisih` | teks / TEXT | Ya, hanya pada baris tanpa pasangan | `definisi berbeda`, `metode berbeda`, `vintage berbeda`, `cakupan berbeda`, `belum terjelaskan` | Penjelasan utama selisih; wajib terisi pada baris berpasangan. |
+| `penjelasan` | teks / TEXT | Tidak | Teks | Alasan kategori, atau alasan tidak ada pasangan. |
+| `dugaan` | teks / TEXT | Ya | Teks | Wajib terisi bila kategori `belum terjelaskan`. |
+| `bukti` | teks / TEXT | Ya | Teks | Rujukan metadata mentah yang mendukung kategori; untuk `belum terjelaskan` berisi bukti yang sudah dan belum diperiksa. |
+| `alasan_perbandingan` | teks / TEXT | Tidak | Teks | Alasan memilih pasangan dan rincian (`K.PASANGAN[*]["alasan_rincian"]`). |

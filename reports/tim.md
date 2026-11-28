@@ -59,6 +59,33 @@ Snapshot BPS 17 dan 20 Oktober 2026 dibandingkan untuk seri `var1221`. Masing-ma
 
 Snapshot WDI yang tercantum pada manifest adalah 20 Oktober 2026. Artefak proyek yang diperiksa tidak menyediakan tabel perbandingan antar-vintage WDI yang cukup untuk menghitung perubahan nilai antar-snapshot. Oleh karena itu, laporan ini tidak menyimpulkan ada atau tidaknya revisi nilai WDI antar-vintage.
 
+### Penyimpanan SQL dan alasan pilihan basis data
+
+`python pipeline.py` membangun ulang `data/gold/gold.sqlite` dari nol pada setiap eksekusi. Strukturnya mengikuti DDL di `src/gold/skema.sql`, sedangkan pemuatannya dilakukan oleh `src/gold/penyimpanan.py`. Berkas basis data (sekitar 5 MB) tidak di-commit (`*.sqlite` di `.gitignore`) karena selalu dapat dibangun ulang dari `data/raw/`. Setiap tabel memiliki kunci primer dan tipe kolom yang eksplisit. Setelah pemuatan, jumlah baris SQL dicocokkan dengan jumlah baris Parquet; pipeline berhenti bila ada yang berbeda atau bila kolom DataFrame tidak cocok dengan DDL. Hasil pemuatan terakhir dicatat otomatis di `reports/penyimpanan-sql.md`:
+
+| Lapis | Tabel SQL | Kunci primer | Baris SQL = Parquet |
+|---|---|---|---:|
+| Bronze | `mentah_dokumen` | `_berkas_raw` | 12 dokumen JSON |
+| Silver | `silver` | `sumber, seri_kode, wilayah_kode, periode, rincian, _berkas_raw` | 1.653 |
+| Gold | `observasi_terpilih` | `seri_kode, wilayah_kode, periode` | 1.653 |
+| Gold | `grid_kelengkapan` | `seri_kode, wilayah_kode, periode` | 1.716 |
+| Gold | `panel_provinsi` | `seri_kode, wilayah_kode, periode` | 1.672 |
+| Gold | `panel_provinsi_lebar` | `wilayah_kode, periode` | 418 |
+| Gold | `nasional` | `seri_kode, wilayah_kode, periode` | 125 |
+| Gold | `rekonsiliasi_nasional` | `pasangan, periode` | 89 |
+
+Kunci primer Silver sama dengan kunci unik skema minimal starter. Kunci Gold mengikuti aturan satu nilai per sel (`seri_kode × wilayah_kode × periode`). Selain kunci primer, DDL memuat sejumlah `CHECK` yang menegakkan aturan Gold langsung di basis data: `nilai` terisi jika dan hanya jika `kategori = 'terisi'`, `anomaly_flag` bernilai 0/1, `nasional.wilayah_kode = 9999`, dan baris rekonsiliasi berpasangan wajib memiliki selisih serta kategori dari daftar baku. `periode` disimpan sebagai `TEXT` agar format `2020-S1`/`2020-Q3` tetap sah, dan sel kosong disimpan sebagai `NULL`, bukan nol.
+
+**Mengapa SQLite untuk Silver dan Gold.** SQLite dipilih karena tidak membutuhkan server, termasuk dalam pustaka standar Python, dan disimpan sebagai satu berkas. Dengan begitu, `python pipeline.py` dari klon bersih langsung menghasilkan basis data yang sama di laptop setiap anggota tanpa instalasi atau kredensial tambahan. Volume data kecil (ribuan baris), sehingga keunggulan PostgreSQL (konkurensi banyak penulis, hak akses) tidak terpakai. DuckDB lebih cocok untuk agregasi kolumnar berukuran besar dan disiapkan untuk tahap 7 (arsip WDI 142 rilis), tetapi untuk tabel kecil yang menuntut keunikan kunci, kunci primer dan `CHECK` di SQLite sudah memadai.
+
+**Dibandingkan menyimpan respons JSON mentah sebagai dokumen.** Ke-12 berkas JSON mentah tetap disimpan utuh di `mentah_dokumen` (sekitar 3,8 juta karakter, `CHECK (json_valid(isi))`) sebagai salinan Bronze yang dapat diaudit dengan `_sha256_raw`. Namun, dokumen tidak cocok dijadikan lapis analisis:
+
+- **Bentuk tiap sumber berbeda.** BPS menyimpan nilai dalam `datacontent` dengan kunci berupa gabungan kode (`vervar` + `var` + `turvar` + kode tahun + `turtahun`, misalnya `1500143901150`) dan dipecah menjadi empat halaman per berkas, sedangkan WDI berupa larik `[metadata, [observasi]]`. Kueri harus menguraikan struktur yang berbeda untuk setiap sumber.
+- **Kueri lebih lambat.** Mengambil `SE.PRE.ENRR` 2015–2018 dari dokumen (`json_each` + `json_extract`) membutuhkan sekitar 48 ms. Kueri yang sama pada tabel `nasional` hanya sekitar 0,2 ms karena memakai indeks kunci primer.
+- **Keunikan tidak bisa ditegakkan.** Dokumen tidak dapat menolak observasi ganda. Pada tabel relasional, sisipan duplikat ke `nasional` ditolak (`UNIQUE constraint failed: nasional.seri_kode, nasional.wilayah_kode, nasional.periode`).
+
+Kesimpulannya, pendekatan dokumen dipakai untuk lapis mentah, di mana bentuk asli harus dipertahankan, sedangkan tabel relasional berkunci primer dipakai untuk Silver dan Gold, yang membutuhkan skema tetap, keunikan kunci, dan kueri lintas seri. Keputusan ini dicatat sebagai `K-019`.
+
 ## Masalah data dan penanganannya
 
 | Masalah | Jumlah baris/observasi terdampak | Keputusan penanganan | Alternatif yang ditolak | Rujukan |
@@ -107,6 +134,42 @@ Perbedaan nilai antara BPS dan WDI tidak dapat langsung ditafsirkan sebagai kesa
 - **Granularitas:** WDI yang diperiksa hanya memiliki data nasional, sedangkan BPS memiliki rincian provinsi serta agregat Indonesia. Karena itu, perbandingan harus memakai baris agregat Indonesia.
 - **Perubahan batas wilayah:** seri provinsi sebelum dan sesudah pemekaran tidak sepenuhnya sebanding. Nilai provinsi induk sebelum pemekaran mencakup wilayah yang kemudian menjadi provinsi baru; nilai tersebut tidak dialokasikan ulang.
 
+### Tabel rekonsiliasi dan kategori selisih
+
+`data/gold/rekonsiliasi_nasional.parquet` (juga tabel SQL `rekonsiliasi_nasional`) dibuat oleh `pipeline.py` melalui `src/gold/integrasi_nasional.py`. Satu baris mewakili satu pasangan × periode. Rumusnya `selisih = nilai_utama − nilai_pembanding`. Kolom `status_pasangan` menandai `berpasangan`, `hanya_utama`, atau `hanya_pembanding`, sehingga periode tanpa pasangan tetap tampil. Selisih tidak dihapus, tidak dibulatkan menjadi sama, dan tidak dikoreksi. Teks penjelasan dan bukti setiap pasangan disimpan di `src/konfigurasi.py` (`PASANGAN[*]["rekonsiliasi"]`). Pipeline berhenti bila ada baris berpasangan tanpa kategori, kategori di luar daftar baku, atau baris *belum terjelaskan* tanpa dugaan dan bukti.
+
+| Pasangan | Berpasangan | Hanya utama | Hanya pembanding | Kategori baris berpasangan |
+|---|---:|---:|---:|---|
+| P-01 `var1439` vs `SE.PRE.ENRR` | 4 (2015–2018) | 7 (2019–2025) | 45 (1970–2014) | 3 *definisi berbeda*, 1 *belum terjelaskan* (2015) |
+| P-02 `var1221` vs `IT.NET.USER.ZS` | 10 (2015–2024) | 1 (2025) | 22 (1990, 1994–2014) | 10 *definisi berbeda* |
+
+| Pasangan | Tahun | Utama | Pembanding | Selisih | Kategori |
+|---|---|---:|---:|---:|---|
+| P-01 | 2015 | 35,18 | 47,35 | −12,17 | belum terjelaskan |
+| P-01 | 2016 | 34,62 | 61,88 | −27,26 | definisi berbeda |
+| P-01 | 2017 | 33,84 | 63,19 | −29,35 | definisi berbeda |
+| P-01 | 2018 | 37,92 | 62,34 | −24,42 | definisi berbeda |
+| P-02 | 2015 | 56,92 | 22,06 | 34,86 | definisi berbeda |
+| P-02 | 2016 | 58,30 | 25,45 | 32,85 | definisi berbeda |
+| P-02 | 2017 | 59,59 | 32,34 | 27,25 | definisi berbeda |
+| P-02 | 2018 | 62,41 | 39,90 | 22,51 | definisi berbeda |
+| P-02 | 2019 | 63,53 | 47,69 | 15,84 | definisi berbeda |
+| P-02 | 2020 | 62,84 | 53,73 | 9,11 | definisi berbeda |
+| P-02 | 2021 | 65,87 | 62,10 | 3,77 | definisi berbeda |
+| P-02 | 2022 | 67,88 | 66,48 | 1,40 | definisi berbeda |
+| P-02 | 2023 | 67,29 | 69,21 | −1,92 | definisi berbeda |
+| P-02 | 2024 | 68,65 | 72,78 | −4,13 | definisi berbeda |
+
+Median selisih absolut ke-14 baris berpasangan adalah 19,17 poin.
+
+**P-01, definisi berbeda (2016–2018).** Kelompok umur acuannya berbeda. APK PAUD BPS dihitung terhadap penduduk umur 3–6 tahun dari Susenas (`var.note` di `sdg4_apk_paud.json`: "APK PAUD 3-6 Tahun"). `SE.PRE.ENRR` membagi seluruh peserta prasekolah, berapa pun umurnya, dengan penduduk pada kelompok umur *resmi* jenjang prasekolah (sourceNote di `wdi/2026-10-20/metadata/sumber2_indikator.json`). Kelompok umur resmi lebih sempit daripada 3–6 tahun, sehingga penyebut UIS lebih kecil dan rasionya lebih tinggi; ini konsisten dengan WDI yang selalu berada di atas BPS. Perbedaan sumber (survei rumah tangga vs data administratif UIS) dicatat sebagai perbedaan metode sekunder. Rentang umur resmi prasekolah Indonesia tidak tercantum di berkas mentah, sehingga besaran efek penyebut belum dihitung.
+
+**P-01, belum terjelaskan (2015).** Perbedaan definisi menjelaskan mengapa WDI lebih tinggi, tetapi tidak menjelaskan mengapa selisih 2015 (−12,17) jauh lebih kecil daripada 2016–2018. *Dugaan:* WDI 2015 (47,35) turun 10,53 poin dari 2014 (57,88) lalu naik 14,53 poin ke 2016 (61,88), sementara BPS stabil (35,18 → 34,62). Pola turun-naik satu tahun yang hanya muncul di WDI mengarah ke perubahan cakupan data administratif UIS atau revisi penyebut penduduk pada tahun tersebut. *Bukti yang sudah dicari:* `obs_status` `SE.PRE.ENRR` 2014–2016 di `kelompok-02-hal-01.json` kosong (tidak ditandai estimasi), dan metadata WDI tidak menyebut patahan seri. *Belum diperiksa:* arsip WDI 142 rilis (tahap 7), untuk melihat apakah nilai 2015 berubah antar-rilis. Bila berubah, kategori baris ini akan diganti menjadi *vintage berbeda*.
+
+**P-02, definisi berbeda (2015–2024).** Pasangan ini bersifat kontekstual. `var1221` mengukur individu umur 5 tahun ke atas yang menguasai/memiliki telepon genggam (Susenas Kor), sedangkan `IT.NET.USER.ZS` mengukur individu yang memakai internet dari lokasi dan perangkat apa pun dalam tiga bulan terakhir (ITU), terhadap seluruh penduduk. Selisih positif besar pada 2015 berarti banyak pemilik ponsel belum memakai internet. Selisih menyempit setiap tahun dan berbalik negatif sejak 2023, karena penggunaan internet tumbuh lebih cepat (22,06 → 72,78) daripada kepemilikan ponsel (56,92 → 68,65) dan internet dapat dipakai tanpa memiliki ponsel sendiri. Perbedaan penyebut (umur 5+ vs seluruh penduduk) merupakan perbedaan cakupan sekunder.
+
+Keputusan cakupan tabel (semua periode tampil, satu kategori per baris berpasangan) dicatat sebagai `K-020`, dan klasifikasi P-01 2015 sebagai `K-021`.
+
 ### Hasil analisis revisi arsip WDI
 
 Arsip proyek mencatat dua berkas data WDI dan metadata indikator pada snapshot 20 Oktober 2026. Namun, tidak ditemukan hasil perbandingan antar-vintage WDI yang menampilkan nilai lama, nilai baru, atau jumlah revisi. Oleh sebab itu, hasil yang dapat dipastikan dari repositori saat ini adalah ketersediaan seri dan metadata definisinya; analisis perubahan/revisi antar-arsip WDI belum dapat dinyatakan selesai berdasarkan bukti yang tersedia.
@@ -126,7 +189,7 @@ Validasi dilakukan pada `data/silver/silver.parquet`. `reports/validasi.md` menc
 | Konsistensi satuan | Lolos |
 | **Total** | **5 dari 5 aturan lolos** |
 
-Validasi Gold juga dinyatakan **LOLOS**. Pemeriksaan Gold mencakup keberadaan tabel keluaran yang diwajibkan, keunikan kunci panel, kategori kelengkapan yang valid, serta konsistensi antara kategori sel dan kondisi nilai terisi atau kosong. Hasil pipeline terakhir menghasilkan 1.672 sel panel provinsi, 418 baris panel lebar, dan 14 baris rekonsiliasi nasional.
+Validasi Gold juga dinyatakan **LOLOS**. Pemeriksaan Gold mencakup keberadaan tabel keluaran yang diwajibkan, keunikan kunci panel, kategori kelengkapan yang valid, serta konsistensi antara kategori sel dan kondisi nilai terisi atau kosong. Hasil pipeline terakhir menghasilkan 1.672 sel panel provinsi, 418 baris panel lebar, dan 89 baris rekonsiliasi nasional (14 berpasangan).
 
 Pemeriksaan anomali juga mencatat 0 galat input di luar rentang satuan. Ini tidak berarti seluruh nilai ekstrem merupakan nilai yang sudah terverifikasi secara substantif; catatan outlier dan kandidat patahan tetap dipertahankan untuk peninjauan.
 
@@ -134,9 +197,9 @@ Pemeriksaan anomali juga mencatat 0 galat input di luar rentang satuan. Ini tida
 
 Repositori menyediakan perintah pipeline `python pipeline.py` sebagai pembangkit laporan profiling, grid kelengkapan, pembanding, metadata, dan anomali. Catatan sprint NIM 124450030 menyebut ekstraksi membaca 17 berkas dan menghasilkan 4.146 baris mentah. Hasil validasi Silver terbaru yang dilaporkan adalah 1.653 baris dengan lima aturan validasi lolos.
 
-Pipeline dapat dijalankan melalui `python pipeline.py`. Pada eksekusi terakhir, pipeline berhasil menyelesaikan ekstraksi, Silver, Gold, dan validasi. Hasilnya mencakup 1.653 baris Silver, 1.653 observasi terpilih di Gold, 1.672 sel panel provinsi, 418 baris panel lebar, dan 14 baris rekonsiliasi nasional. `validasi_silver` dan `validasi_gold` sama-sama LOLOS.
+Pipeline dapat dijalankan melalui `python pipeline.py`. Pada eksekusi terakhir, pipeline berhasil menyelesaikan ekstraksi, Silver, Gold, dan validasi. Hasilnya mencakup 1.653 baris Silver, 1.653 observasi terpilih di Gold, 1.672 sel panel provinsi, 418 baris panel lebar, dan 89 baris rekonsiliasi nasional (14 berpasangan). `validasi_silver` dan `validasi_gold` sama-sama LOLOS.
 
-Artefak Gold yang dihasilkan meliputi `observasi_terpilih.parquet`, `panel_provinsi.parquet`, `panel_provinsi_lebar.parquet`, `grid_kelengkapan.parquet`, `nasional.parquet`, dan `rekonsiliasi_nasional.parquet`, serta basis data `gold.sqlite`. Artefak-artefak tersebut telah dimasukkan ke commit implementasi Gold. Waktu eksekusi dari kondisi nol dan benchmark Pandas dibandingkan DuckDB/Dask belum dicatat, sehingga tidak dibuat klaim performa yang belum didukung pengukuran.
+Artefak Gold yang dihasilkan meliputi `observasi_terpilih.parquet`, `panel_provinsi.parquet`, `panel_provinsi_lebar.parquet`, `grid_kelengkapan.parquet`, `nasional.parquet`, dan `rekonsiliasi_nasional.parquet`, serta basis data `gold.sqlite`. Berkas Parquet di-commit; `gold.sqlite` tidak di-commit karena dibangun ulang oleh pipeline dan jumlah barisnya dicocokkan dengan Parquet (lihat *Penyimpanan SQL dan alasan pilihan basis data*). Waktu eksekusi dari kondisi nol dan benchmark Pandas dibandingkan DuckDB/Dask belum dicatat, sehingga tidak dibuat klaim performa yang belum didukung pengukuran.
 ## Pembagian kerja
 
 | Anggota | NIM | Komponen | Tugas sampingan | Bagian laporan yang ditulis |
@@ -155,13 +218,11 @@ Artefak Gold yang dihasilkan meliputi `observasi_terpilih.parquet`, `panel_provi
 
 ### 1. Tujuan Integrasi
 
-Integrasi dan rekonsiliasi nasional dilakukan untuk membandingkan indikator dari BPS dengan indikator pembanding dari World Development Indicators (WDI). Perbandingan menggunakan data agregat nasional dengan `wilayah_kode = 9999` dan `rincian = total`.
-
-Tujuan proses ini adalah mengetahui perbedaan nilai antarindikator, menghitung selisih, serta menjelaskan perbedaan berdasarkan definisi dan cakupan pengukuran masing-masing indikator.
+Integrasi dan rekonsiliasi nasional dilakukan untuk membandingkan indikator dari Badan Pusat Statistik (BPS) dengan indikator pembanding dari World Development Indicators (WDI). Proses ini bertujuan mengetahui perbedaan nilai antarindikator, menghitung selisih, serta menjelaskan perbedaan berdasarkan definisi dan cakupan pengukuran masing-masing indikator.
 
 ### 2. Pasangan Indikator yang Dibandingkan
 
-#### P-01 — APK PAUD
+#### P-01 – APK PAUD
 
 - Seri utama BPS: `var1439`
 - Seri pembanding WDI: `SE.PRE.ENRR`
@@ -176,11 +237,9 @@ Tujuan proses ini adalah mengetahui perbedaan nilai antarindikator, menghitung s
 
 **Analisis:**
 
-Nilai APK PAUD dari BPS lebih rendah dibandingkan indikator WDI pada seluruh periode pengamatan. Selisih terbesar terjadi pada tahun 2017 sebesar -29,3531 poin persentase.
+Nilai APK PAUD dari BPS lebih rendah dibandingkan indikator WDI pada seluruh periode pengamatan. Perbedaan ini berkaitan dengan cakupan pengukuran. Data BPS menggunakan kelompok usia 3–6 tahun, sedangkan indikator WDI mengacu pada cakupan pendidikan prasekolah berdasarkan definisi indikator internasional. Oleh karena itu, kedua indikator memiliki keterkaitan konsep, tetapi tidak sepenuhnya identik.
 
-Perbedaan ini berkaitan dengan cakupan pengukuran. Data BPS menggunakan kelompok usia 3–6 tahun, sedangkan indikator UIS menggunakan usia resmi jenjang prasekolah. Oleh karena itu, kedua indikator memiliki keterkaitan konsep, tetapi tidak sepenuhnya identik.
-
-#### P-02 — Perbandingan Kepemilikan Telepon Genggam dan Penggunaan Internet
+#### P-02 – Perbandingan Kepemilikan Telepon Genggam dan Penggunaan Internet
 
 - Seri utama BPS: `var1221`
 - Seri pembanding WDI: `IT.NET.USER.ZS`
@@ -201,36 +260,32 @@ Perbedaan ini berkaitan dengan cakupan pengukuran. Data BPS menggunakan kelompok
 
 **Analisis:**
 
-Pada tahun 2015, nilai indikator BPS lebih tinggi 34,8573 poin persentase daripada indikator WDI. Selisih tersebut semakin kecil hingga tahun 2022, kemudian menjadi negatif pada tahun 2023 dan 2024.
+Pada periode 2015–2022, nilai indikator BPS lebih tinggi daripada indikator WDI. Namun, pada 2023 dan 2024, nilai WDI lebih tinggi. Perbedaan ini perlu dipahami berdasarkan definisi indikator. BPS mengukur kepemilikan telepon genggam, sedangkan WDI mengukur proporsi individu yang menggunakan internet. Dengan demikian, kedua indikator tidak mengukur hal yang sama dan digunakan sebagai indikator pembanding kontekstual.
 
-Perbedaan terjadi karena kedua indikator mengukur aspek yang berbeda. BPS mengukur kepemilikan telepon genggam, sedangkan WDI mengukur penggunaan internet. Seseorang dapat menggunakan internet tanpa memiliki telepon genggam pribadi.
-
-Dengan demikian, `IT.NET.USER.ZS` digunakan sebagai pembanding kontekstual untuk melihat perkembangan penetrasi digital nasional, bukan sebagai indikator yang identik dengan kepemilikan telepon genggam.
-
-### 3. Metode Perhitungan
+### 3. Metode Perhitungan Selisih
 
 Selisih dihitung menggunakan rumus:
 
-`Selisih = nilai_seri_utama - nilai_pembanding`
+`Selisih = Nilai BPS - Nilai WDI`
 
-Interpretasi:
-- Selisih positif menunjukkan nilai seri utama lebih tinggi.
-- Selisih negatif menunjukkan nilai seri utama lebih rendah.
-- Selisih mendekati nol menunjukkan kedua nilai semakin berdekatan.
+Interpretasi hasil:
+- Selisih positif menunjukkan nilai indikator BPS lebih tinggi daripada WDI.
+- Selisih negatif menunjukkan nilai indikator BPS lebih rendah daripada WDI.
+- Selisih nol menunjukkan kedua nilai sama.
 
-Karena kedua indikator dinyatakan dalam persen, hasil pengurangan diinterpretasikan sebagai poin persentase.
+Karena kedua indikator dinyatakan dalam persentase, hasil pengurangan dibaca sebagai perbedaan dalam poin persentase.
 
 ### 4. Ringkasan Hasil Rekonsiliasi
 
-Hasil rekonsiliasi menghasilkan 14 baris data, terdiri dari:
-- P-01: 4 baris perbandingan APK PAUD.
-- P-02: 10 baris perbandingan kepemilikan telepon genggam.
+Berdasarkan hasil perbandingan yang tersedia, terdapat dua pasangan indikator dengan total 14 observasi, terdiri atas 4 observasi pada P-01 dan 10 observasi pada P-02.
 
-Perbedaan nilai tidak secara otomatis menunjukkan kesalahan data. Perbedaan dapat disebabkan oleh definisi indikator, cakupan populasi, dan aspek yang diukur oleh masing-masing sumber.
+Kedua pasangan menunjukkan adanya perbedaan nilai antara data BPS dan WDI. Perbedaan tersebut tidak selalu menunjukkan kesalahan data karena masing-masing indikator memiliki definisi, cakupan, dan metode pengukuran yang berbeda.
 
-### 5. Sumber Data dan Kode
+### 5. Sumber Data dan Reproduksibilitas
 
-- Hasil rekonsiliasi: `data/gold/rekonsiliasi_nasional.parquet`
-- Tabel nasional: `data/gold/nasional.parquet`
-- Log keputusan pasangan indikator: `log-keputusan.csv`
-- Implementasi integrasi: `src/gold/integrasi_nasional.py`
+Sumber yang digunakan untuk mendukung proses integrasi dan rekonsiliasi meliputi:
+
+- `data/gold/rekonsiliasi_nasional.parquet`
+- `data/gold/nasional.parquet`
+- `log-keputusan.csv`
+- `src/gold/integrasi_nasional.py`
