@@ -1,4 +1,5 @@
-﻿"""Tahap 8: validasi Silver dan Gold."""
+﻿
+"""Tahap 8: validasi Silver, Gold, dan rekonsiliasi."""
 
 from pathlib import Path
 import pandas as pd
@@ -14,7 +15,6 @@ def validasi_silver(df):
     kurang = [c for c in wajib if c not in df.columns]
     if kurang:
         raise ValueError(f"Kolom Silver tidak lengkap: {kurang}")
-
     if df.empty:
         raise ValueError("Silver kosong.")
 
@@ -44,46 +44,85 @@ def validasi_silver(df):
     return True
 
 
-def validasi_gold(gold):
+def validasi_gold(silver, gold):
     wajib = [
-        "panel_provinsi",
-        "panel_provinsi_lebar",
-        "grid_kelengkapan",
-        "nasional",
-        "rekonsiliasi_nasional",
+        "panel_provinsi", "panel_provinsi_lebar",
+        "grid_kelengkapan", "nasional", "rekonsiliasi_nasional",
     ]
-
     kurang = [nama for nama in wajib if nama not in gold]
     if kurang:
         raise ValueError(f"Tabel Gold tidak lengkap: {kurang}")
 
     panel = gold["panel_provinsi"]
-    kunci = ["seri_kode", "wilayah_kode", "periode"]
+    rekonsiliasi = gold["rekonsiliasi_nasional"]
 
-    if panel.duplicated(kunci).any():
-        raise ValueError("Ditemukan duplikasi sel panel Gold.")
+    kolom_panel = [
+        "seri_kode", "wilayah_kode", "periode", "kategori",
+        "nilai", "satuan", "rincian", "_berkas_raw",
+    ]
+    kurang_panel = [c for c in kolom_panel if c not in panel.columns]
+    if kurang_panel:
+        raise ValueError(f"Kolom panel Gold tidak lengkap: {kurang_panel}")
 
-    if not panel["kategori"].isin([
+    kategori_valid = [
         "terisi", "missing", "belum_ada",
         "tidak_diterbitkan", "batas_lama",
-    ]).all():
-        raise ValueError("Kategori grid Gold tidak dikenal.")
+    ]
+    if not panel["kategori"].isin(kategori_valid).all():
+        raise ValueError("Kategori Gold tidak dikenal.")
 
     terisi = panel["kategori"] == "terisi"
     if panel.loc[terisi, "nilai"].isna().any():
-        raise ValueError("Ada sel berstatus terisi tanpa nilai.")
-
+        raise ValueError("Ada sel terisi tanpa nilai.")
     if panel.loc[~terisi, "nilai"].notna().any():
-        raise ValueError("Ada nilai pada sel yang tidak berstatus terisi.")
+        raise ValueError("Ada nilai pada sel yang tidak terisi.")
 
-    return True
+    # Aturan 1: kunci panel Gold harus unik.
+    kunci_panel = ["seri_kode", "wilayah_kode", "periode"]
+    aturan_1 = not panel.duplicated(kunci_panel).any()
+
+    # Aturan 2: satu indikator hanya memiliki satu satuan.
+    satuan = panel.groupby("seri_kode")["satuan"].nunique()
+    aturan_2 = not (satuan > 1).any()
+
+    # Aturan 3: setiap sel Gold terisi memiliki pasangan Silver.
+    kolom_kunci = [
+        "seri_kode", "wilayah_kode", "periode",
+        "rincian", "_berkas_raw",
+    ]
+    pasangan = panel.loc[terisi, kolom_kunci].merge(
+        silver[kolom_kunci].drop_duplicates(),
+        on=kolom_kunci,
+        how="left",
+        indicator=True,
+    )
+    aturan_3 = (pasangan["_merge"] == "both").all()
+
+    # Aturan 4: rekonsiliasi berpasangan harus memiliki kategori.
+    kolom_rek = ["status_pasangan", "kategori_selisih"]
+    kurang_rek = [c for c in kolom_rek if c not in rekonsiliasi.columns]
+    if kurang_rek:
+        raise ValueError(f"Kolom rekonsiliasi tidak lengkap: {kurang_rek}")
+
+    berpasangan = rekonsiliasi[
+        rekonsiliasi["status_pasangan"] == "berpasangan"
+    ]
+    aturan_4 = (
+        berpasangan["kategori_selisih"].notna()
+        & berpasangan["kategori_selisih"].astype(str).str.strip().ne("")
+    ).all()
+
+    return {
+        "kunci_panel_unik": bool(aturan_1),
+        "satuan_per_indikator": bool(aturan_2),
+        "pasangan_gold_silver": bool(aturan_3),
+        "kategori_rekonsiliasi": bool(aturan_4),
+    }
 
 
 def jalankan(silver, gold):
-    hasil = {
-        "validasi_silver": validasi_silver(silver),
-        "validasi_gold": validasi_gold(gold),
-    }
+    validasi_silver(silver)
+    hasil_gold = validasi_gold(silver, gold)
 
     folder = Path("reports")
     folder.mkdir(parents=True, exist_ok=True)
@@ -91,10 +130,13 @@ def jalankan(silver, gold):
     isi = [
         "# Laporan Validasi",
         "",
-        "## Hasil pemeriksaan",
+        "## Validasi Silver",
+        "- validasi_silver: LOLOS",
+        "",
+        "## Validasi Gold dan Rekonsiliasi",
     ]
 
-    for nama, status in hasil.items():
+    for nama, status in hasil_gold.items():
         isi.append(f"- {nama}: {'LOLOS' if status else 'GAGAL'}")
 
     isi.extend([
@@ -109,7 +151,14 @@ def jalankan(silver, gold):
     )
 
     print("\n=== HASIL VALIDASI ===")
-    for nama, status in hasil.items():
+    print("validasi_silver: LOLOS")
+    for nama, status in hasil_gold.items():
         print(f"{nama}: {'LOLOS' if status else 'GAGAL'}")
 
-    return hasil
+    if not all(hasil_gold.values()):
+        raise ValueError("Terdapat aturan validasi Gold yang gagal.")
+
+    return {
+        "validasi_silver": True,
+        "validasi_gold": True,
+    }

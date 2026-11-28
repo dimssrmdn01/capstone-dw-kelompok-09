@@ -1,7 +1,7 @@
 {
   "metrik": {
-    "aturan_validasi": 5,
-    "aturan_lolos": 5
+    "aturan_validasi": 9,
+    "aturan_lolos": 9
   },
   "seed": 0,
   "data_hash": "322ae8bff3296c1c0cf2a61e4319b08e6d9dcf8283d3da8c38d0d0b2781bbdef",
